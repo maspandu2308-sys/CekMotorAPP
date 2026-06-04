@@ -10,12 +10,13 @@
 // Buat project gratis di: https://console.firebase.google.com
 // Aktifkan: Authentication (Email/Password) + Firestore Database
 const FIREBASE_CONFIG = {
-  apiKey: "MASUKKAN_API_KEY",
-  authDomain: "MASUKKAN_PROJECT_ID.firebaseapp.com",
-  projectId: "MASUKKAN_PROJECT_ID",
-  storageBucket: "MASUKKAN_PROJECT_ID.appspot.com",
-  messagingSenderId: "MASUKKAN_SENDER_ID",
-  appId: "MASUKKAN_APP_ID"
+  apiKey: "AIzaSyACWXuhLA-UDrXfc8G0o0j2gbx_aXRifAQ",
+  authDomain: "cekmotorapp.firebaseapp.com",
+  databaseURL: "https://cekmotorapp-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "cekmotorapp",
+  storageBucket: "cekmotorapp.firebasestorage.app",
+  messagingSenderId: "872415282316",
+  appId: "1:872415282316:web:b0711dd8e4c6f8473f67a9"
 };
 
 let fbAuth = null;
@@ -24,16 +25,13 @@ let USE_FIREBASE = false;
 
 function initFirebase() {
   try {
-    if (typeof firebase === 'undefined') return;
-    if (FIREBASE_CONFIG.apiKey === 'MASUKKAN_API_KEY') {
-      updateDbBadge(false); return;
-    }
+    if (typeof firebase === 'undefined') { updateDbBadge(false); return; }
     firebase.initializeApp(FIREBASE_CONFIG);
     fbAuth = firebase.auth();
-    fbDB   = firebase.firestore();
+    fbDB   = firebase.database();
     USE_FIREBASE = true;
     updateDbBadge(true);
-    console.log('✅ Firebase terhubung!');
+    console.log('✅ Firebase Realtime Database terhubung!');
   } catch(e) {
     console.warn('⚠️ Firebase gagal:', e.message);
     updateDbBadge(false);
@@ -258,9 +256,9 @@ async function handleLogin(e) {
     try {
       const cred    = await fbAuth.signInWithEmailAndPassword(email, pass);
       const uid     = cred.user.uid;
-      const userDoc = await fbDB.collection('users').doc(uid).get();
-      currentUser = userDoc.exists
-        ? { id:uid, ...userDoc.data() }
+      const userSnap = await fbDB.ref('users/' + uid).get();
+      currentUser = userSnap.exists()
+        ? { id:uid, ...userSnap.val() }
         : { id:uid, nama:email.split('@')[0], email, role:'user' };
       localStorage.setItem('cma_currentUser', JSON.stringify(currentUser));
       await syncFromFirebase();
@@ -317,7 +315,11 @@ async function handleRegister(e) {
       const cred = await fbAuth.createUserWithEmailAndPassword(email, pass);
       const uid  = cred.user.uid;
       const userData = { nama, email, role:'user', createdAt: new Date().toLocaleDateString('id-ID') };
-      await fbDB.collection('users').doc(uid).set(userData);
+      await fbDB.ref('users/' + uid).set(userData);
+      // Simpan juga ke localStorage users list untuk admin panel
+      const localUsers = getLocalUsers();
+      localUsers.push({ id:uid, ...userData, password:'' });
+      saveLocalUsers(localUsers);
       showToast('Pendaftaran berhasil! Silakan login.', 'success');
       document.getElementById('registerForm').reset();
       setTimeout(() => showPage('login'), 1200);
@@ -405,35 +407,38 @@ function updateUIUser() {
   if (tAv) tAv.textContent = init;
 }
 
-// ==================== FIREBASE SYNC ====================
+// ==================== FIREBASE REALTIME DATABASE SYNC ====================
+// Struktur DB: /motors/{uid}/{motorId}, /history/{uid}/{histId}, /reminders/{uid}/{remId}
+
 async function syncFromFirebase() {
   if (!USE_FIREBASE || !currentUser || currentUser.id === 'admin') return;
   try {
     showLoading(true, 'Mengambil data dari cloud...');
     const uid = currentUser.id;
 
-    // Motors
-    const mSnap = await fbDB.collection('motors').where('userId','==',uid).get();
-    if (!mSnap.empty) {
-      localStorage.setItem('cma_motors_'+uid,
-        JSON.stringify(mSnap.docs.map(d => ({ id:d.id, ...d.data() }))));
+    // Sync motors
+    const mSnap = await fbDB.ref('motors/' + uid).get();
+    if (mSnap.exists()) {
+      const motors = Object.values(mSnap.val());
+      localStorage.setItem('cma_motors_' + uid, JSON.stringify(motors));
     }
 
-    // History
-    const hSnap = await fbDB.collection('history').where('userId','==',uid)
-                            .orderBy('tanggalISO','desc').get();
-    if (!hSnap.empty) {
-      localStorage.setItem('cma_history_'+uid,
-        JSON.stringify(hSnap.docs.map(d => ({ id:d.id, ...d.data() }))));
+    // Sync history (urutkan dari terbaru)
+    const hSnap = await fbDB.ref('history/' + uid).get();
+    if (hSnap.exists()) {
+      const history = Object.values(hSnap.val())
+        .sort((a, b) => new Date(b.tanggalISO) - new Date(a.tanggalISO));
+      localStorage.setItem('cma_history_' + uid, JSON.stringify(history));
     }
 
-    // Reminders
-    const rSnap = await fbDB.collection('reminders').where('userId','==',uid).get();
-    if (!rSnap.empty) {
-      localStorage.setItem('cma_reminders_'+uid,
-        JSON.stringify(rSnap.docs.map(d => ({ id:d.id, ...d.data() }))));
+    // Sync reminders
+    const rSnap = await fbDB.ref('reminders/' + uid).get();
+    if (rSnap.exists()) {
+      const reminders = Object.values(rSnap.val());
+      localStorage.setItem('cma_reminders_' + uid, JSON.stringify(reminders));
     }
-    console.log('✅ Data synced from Firebase');
+
+    console.log('✅ Data synced from Firebase Realtime DB');
   } catch(e) {
     console.warn('Sync gagal:', e);
   } finally {
@@ -444,36 +449,34 @@ async function syncFromFirebase() {
 async function pushMotorsToFirebase(motors) {
   if (!USE_FIREBASE || !currentUser || currentUser.id === 'admin') return;
   try {
-    const uid   = currentUser.id;
-    const batch = fbDB.batch();
-    const snap  = await fbDB.collection('motors').where('userId','==',uid).get();
-    snap.docs.forEach(d => batch.delete(d.ref));
-    motors.forEach(m => batch.set(fbDB.collection('motors').doc(m.id), { ...m, userId:uid }));
-    await batch.commit();
+    const uid = currentUser.id;
+    const obj = {};
+    motors.forEach(m => { obj[m.id] = m; });
+    await fbDB.ref('motors/' + uid).set(obj);
   } catch(e) { console.warn('Motor sync:', e); }
 }
 
 async function pushHistoryItemToFirebase(item) {
   if (!USE_FIREBASE || !currentUser || currentUser.id === 'admin') return;
   try {
-    await fbDB.collection('history').doc(item.id).set({ ...item, userId:currentUser.id });
+    await fbDB.ref('history/' + currentUser.id + '/' + item.id).set(item);
   } catch(e) { console.warn('History sync:', e); }
 }
 
 async function deleteHistoryItemFirebase(id) {
   if (!USE_FIREBASE || !currentUser || currentUser.id === 'admin') return;
-  try { await fbDB.collection('history').doc(id).delete(); } catch(e) {}
+  try {
+    await fbDB.ref('history/' + currentUser.id + '/' + id).remove();
+  } catch(e) {}
 }
 
 async function pushRemindersToFirebase(reminders) {
   if (!USE_FIREBASE || !currentUser || currentUser.id === 'admin') return;
   try {
-    const uid   = currentUser.id;
-    const batch = fbDB.batch();
-    const snap  = await fbDB.collection('reminders').where('userId','==',uid).get();
-    snap.docs.forEach(d => batch.delete(d.ref));
-    reminders.forEach(r => batch.set(fbDB.collection('reminders').doc(r.id), { ...r, userId:uid }));
-    await batch.commit();
+    const uid = currentUser.id;
+    const obj = {};
+    reminders.forEach(r => { obj[r.id] = r; });
+    await fbDB.ref('reminders/' + uid).set(obj);
   } catch(e) { console.warn('Reminders sync:', e); }
 }
 

@@ -11,6 +11,19 @@
 </head>
 <body>
 
+<!-- ==================== FIREBASE SDK ==================== -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<!-- ==================== LOADING OVERLAY ==================== -->
+<div id="loadingOverlay" class="loading-overlay hidden">
+  <div class="loading-box">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p id="loadingText">Memproses...</p>
+  </div>
+</div>
+
 <!-- ==================== TOAST NOTIFICATION ==================== -->
 <div id="toast" class="toast"></div>
 
@@ -44,6 +57,9 @@
   </div>
 </div>
 <div id="sidebarOverlay" class="sidebar-overlay hidden" onclick="toggleSidebar()"></div>
+
+<!-- ==================== DB STATUS BADGE ==================== -->
+<div id="dbStatusBadge" class="db-status-badge hidden"></div>
 
 <!-- ==================== TOPBAR (for logged-in pages) ==================== -->
 <div id="topbar" class="topbar hidden">

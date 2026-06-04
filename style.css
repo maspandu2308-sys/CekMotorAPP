@@ -62,6 +62,8 @@ body {
 /* ==================== PAGES ==================== */
 .page { display: none; min-height: 100vh; }
 .page.active { display: block; }
+/* Auth pages need flex layout */
+.page.active.auth-page { display: flex; }
 
 /* ==================== TOAST ==================== */
 .toast {
@@ -1274,6 +1276,37 @@ textarea { resize: vertical; min-height: 80px; }
 .empty-state-center p { font-size: 0.88rem; margin-bottom: 20px; }
 
 .hidden { display: none !important; }
+
+/* ==================== LOADING OVERLAY ==================== */
+.loading-overlay {
+  position: fixed; inset: 0;
+  background: rgba(255,255,255,0.85);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 9998; backdrop-filter: blur(3px);
+}
+.loading-box {
+  text-align: center; padding: 32px 48px;
+  background: white; border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border);
+}
+.loading-box i { font-size: 2.5rem; color: var(--blue); margin-bottom: 12px; display: block; }
+.loading-box p { font-size: 0.9rem; color: var(--gray-600); font-weight: 500; }
+
+/* ==================== DB STATUS BADGE ==================== */
+.db-status-badge {
+  position: fixed;
+  bottom: 20px; right: 20px;
+  padding: 8px 16px;
+  border-radius: 99px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+  z-index: 150; box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+.db-online  { background: var(--green-light); color: var(--green); border: 1px solid #a5d6a7; }
+.db-offline { background: var(--gray-100); color: var(--gray-500); border: 1px solid var(--border); }
 
 /* ==================== PROGRESS BAR ==================== */
 .progress-bar-wrap {

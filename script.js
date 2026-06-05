@@ -156,59 +156,69 @@ function showLoading(show, text) {
 }
 
 // ==================== PAGE NAVIGATION ====================
-const APP_PAGES  = ['dashboard','dataMotor','checklistKondisi','hasilAnalisis',
-                    'rekomendasiBengkel','pengingatServis','riwayatPengecekan','adminDashboard'];
-const AUTH_PAGES = ['login','register','lupaPassword','adminLogin'];
+const AUTH_IDS = ['login','register','lupaPassword','adminLogin'];
+const NAV_ORDER = ['dashboard','dataMotor','checklistKondisi','hasilAnalisis',
+                   'rekomendasiBengkel','pengingatServis','riwayatPengecekan'];
 
 function showPage(pageId) {
-  // hide all pages
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const authWrapper = document.getElementById('authWrapper');
+  const appShell   = document.getElementById('appShell');
+  const dbBadge    = document.getElementById('dbStatusBadge');
 
-  const target = document.getElementById('page-' + pageId);
-  if (target) target.classList.add('active');
-
-  const sidebar = document.getElementById('sidebar');
-  const topbar  = document.getElementById('topbar');
-  const dbBadge = document.getElementById('dbStatusBadge');
-
-  if (APP_PAGES.includes(pageId)) {
-    sidebar.classList.remove('hidden');
-    topbar.classList.remove('hidden');
-    if (dbBadge) dbBadge.classList.remove('hidden');
-    if (window.innerWidth <= 768) sidebar.classList.add('hidden');
-  } else {
-    sidebar.classList.add('hidden');
-    topbar.classList.add('hidden');
+  if (AUTH_IDS.includes(pageId)) {
+    // ---- AUTH MODE ----
+    authWrapper.classList.remove('hidden');
+    appShell.classList.add('hidden');
     if (dbBadge) dbBadge.classList.add('hidden');
+    document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById('auth-' + pageId);
+    if (target) target.classList.add('active');
+
+  } else {
+    // ---- APP MODE ----
+    authWrapper.classList.add('hidden');
+    appShell.classList.remove('hidden');
+    if (dbBadge) dbBadge.classList.remove('hidden');
+
+    // Switch content section
+    document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById('sec-' + pageId);
+    if (target) target.classList.add('active');
+
+    // Update active nav button
+    document.querySelectorAll('#sidebarNav .nav-item').forEach(n => n.classList.remove('active'));
+    const idx = NAV_ORDER.indexOf(pageId);
+    const navBtns = document.querySelectorAll('#sidebarNav .nav-item');
+    if (idx >= 0 && navBtns[idx]) navBtns[idx].classList.add('active');
+
+    // Mobile: close sidebar after nav
+    if (window.innerWidth <= 768) {
+      document.getElementById('sidebar').classList.remove('mobile-open');
+      document.getElementById('sidebarOverlay').classList.add('hidden');
+    }
+
+    // Scroll content area to top
+    const ca = document.getElementById('contentArea');
+    if (ca) ca.scrollTop = 0;
+
+    // Load page data
+    switch(pageId) {
+      case 'dashboard':          loadDashboard();       break;
+      case 'dataMotor':          loadMotorList();       break;
+      case 'checklistKondisi':   loadChecklistPage();   break;
+      case 'hasilAnalisis':      loadHasilPage();       break;
+      case 'rekomendasiBengkel': loadBengkel();         break;
+      case 'pengingatServis':    loadReminders();       break;
+      case 'riwayatPengecekan':  loadHistory();         break;
+      case 'adminDashboard':     loadAdminDashboard();  break;
+    }
   }
-
-  // Update active nav item
-  const navOrder = ['dashboard','dataMotor','checklistKondisi','hasilAnalisis',
-                    'rekomendasiBengkel','pengingatServis','riwayatPengecekan'];
-  document.querySelectorAll('.sidebar-nav .nav-item').forEach(n => n.classList.remove('active'));
-  const idx = navOrder.indexOf(pageId);
-  const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
-  if (idx >= 0 && navItems[idx]) navItems[idx].classList.add('active');
-
-  // Load page data
-  switch(pageId) {
-    case 'dashboard':          loadDashboard();       break;
-    case 'dataMotor':          loadMotorList();       break;
-    case 'checklistKondisi':   loadChecklistPage();   break;
-    case 'hasilAnalisis':      loadHasilPage();       break;
-    case 'rekomendasiBengkel': loadBengkel();         break;
-    case 'pengingatServis':    loadReminders();       break;
-    case 'riwayatPengecekan':  loadHistory();         break;
-    case 'adminDashboard':     loadAdminDashboard();  break;
-  }
-
-  window.scrollTo({ top:0, behavior:'smooth' });
 }
 
 function toggleSidebar() {
   const s = document.getElementById('sidebar');
   const o = document.getElementById('sidebarOverlay');
-  s.classList.toggle('hidden');
+  s.classList.toggle('mobile-open');
   o.classList.toggle('hidden');
 }
 

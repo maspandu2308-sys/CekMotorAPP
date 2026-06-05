@@ -5,18 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CekMotorAPP</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
 
-<!-- ==================== FIREBASE SDK ==================== -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
-<!-- ==================== LOADING OVERLAY ==================== -->
+<!-- Loading Overlay -->
 <div id="loadingOverlay" class="loading-overlay hidden">
   <div class="loading-box">
     <i class="fas fa-spinner fa-spin"></i>
@@ -24,61 +23,19 @@
   </div>
 </div>
 
-<!-- ==================== TOAST NOTIFICATION ==================== -->
+<!-- Toast -->
 <div id="toast" class="toast"></div>
 
-<!-- ==================== SIDEBAR (for logged-in pages) ==================== -->
-<div id="sidebar" class="sidebar hidden">
-  <div class="sidebar-header">
-    <div class="sidebar-logo">
-      <i class="fas fa-motorcycle"></i>
-      <span>CekMotorAPP</span>
-    </div>
-    <button class="sidebar-close" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
-  </div>
-  <div class="sidebar-user">
-    <div class="avatar" id="sidebarAvatar">U</div>
-    <div>
-      <div class="sidebar-username" id="sidebarUsername">User</div>
-      <div class="sidebar-role" id="sidebarRole">Pengguna</div>
-    </div>
-  </div>
-  <nav class="sidebar-nav">
-    <a href="#" class="nav-item" onclick="showPage('dashboard')"><i class="fas fa-home"></i><span>Dashboard</span></a>
-    <a href="#" class="nav-item" onclick="showPage('dataMotor')"><i class="fas fa-motorcycle"></i><span>Data Motor</span></a>
-    <a href="#" class="nav-item" onclick="showPage('checklistKondisi')"><i class="fas fa-clipboard-check"></i><span>Cek Kondisi</span></a>
-    <a href="#" class="nav-item" onclick="showPage('hasilAnalisis')"><i class="fas fa-chart-bar"></i><span>Hasil Pengecekan</span></a>
-    <a href="#" class="nav-item" onclick="showPage('rekomendasiBengkel')"><i class="fas fa-wrench"></i><span>Rekomendasi Bengkel</span></a>
-    <a href="#" class="nav-item" onclick="showPage('pengingatServis')"><i class="fas fa-bell"></i><span>Pengingat Servis</span></a>
-    <a href="#" class="nav-item" onclick="showPage('riwayatPengecekan')"><i class="fas fa-history"></i><span>Riwayat</span></a>
-  </nav>
-  <div class="sidebar-footer">
-    <a href="#" class="nav-item logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
-  </div>
-</div>
-<div id="sidebarOverlay" class="sidebar-overlay hidden" onclick="toggleSidebar()"></div>
-
-<!-- ==================== DB STATUS BADGE ==================== -->
+<!-- DB Status Badge -->
 <div id="dbStatusBadge" class="db-status-badge hidden"></div>
 
-<!-- ==================== TOPBAR (for logged-in pages) ==================== -->
-<div id="topbar" class="topbar hidden">
-  <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-  <div class="topbar-brand"><i class="fas fa-motorcycle"></i> CekMotorAPP</div>
-  <div class="topbar-right">
-    <div class="notif-btn" onclick="showPage('pengingatServis')"><i class="fas fa-bell"></i><span class="notif-badge" id="notifBadge">0</span></div>
-    <div class="topbar-avatar" id="topbarAvatar">U</div>
-  </div>
-</div>
+<!-- ================================================
+     AUTH WRAPPER — tampil saat belum login
+================================================= -->
+<div id="authWrapper">
 
-<!-- ==================== MAIN CONTENT WRAPPER ==================== -->
-<div id="mainWrapper" class="main-wrapper">
-
-<!-- ==============================
-     PAGE: LOGIN
-================================= -->
-<div id="page-login" class="page active auth-page">
-  <div class="auth-container">
+  <!-- LOGIN -->
+  <div id="auth-login" class="auth-screen active">
     <div class="auth-left">
       <div class="auth-brand">
         <i class="fas fa-motorcycle fa-3x"></i>
@@ -86,16 +43,16 @@
         <p>Aplikasi Pengecekan Kondisi Motor Anda Secara Mandiri & Cerdas</p>
       </div>
       <div class="auth-features">
-        <div class="auth-feature-item"><i class="fas fa-check-circle"></i><span>Cek kondisi motor kapan saja</span></div>
-        <div class="auth-feature-item"><i class="fas fa-check-circle"></i><span>Estimasi biaya servis akurat</span></div>
-        <div class="auth-feature-item"><i class="fas fa-check-circle"></i><span>Rekomendasi bengkel terdekat</span></div>
-        <div class="auth-feature-item"><i class="fas fa-check-circle"></i><span>Pengingat servis berkala</span></div>
+        <div class="auth-feat-item"><i class="fas fa-check-circle"></i><span>Cek kondisi motor kapan saja</span></div>
+        <div class="auth-feat-item"><i class="fas fa-check-circle"></i><span>Estimasi biaya servis akurat</span></div>
+        <div class="auth-feat-item"><i class="fas fa-check-circle"></i><span>Rekomendasi bengkel terdekat</span></div>
+        <div class="auth-feat-item"><i class="fas fa-check-circle"></i><span>Pengingat servis berkala</span></div>
       </div>
     </div>
     <div class="auth-right">
       <div class="auth-card">
         <h2>Selamat Datang</h2>
-        <p class="auth-subtitle">Masuk ke akun Anda</p>
+        <p class="auth-sub">Masuk ke akun Anda</p>
         <form id="loginForm" onsubmit="handleLogin(event)">
           <div class="form-group">
             <label><i class="fas fa-envelope"></i> Email / Username</label>
@@ -109,29 +66,20 @@
             </div>
           </div>
           <div class="form-row-between">
-            <label class="checkbox-label"><input type="checkbox" /> Ingat saya</label>
-            <a href="#" class="link-text" onclick="showPage('lupaPassword')">Lupa Password?</a>
+            <label class="check-label"><input type="checkbox" /> Ingat saya</label>
+            <span class="link-text" onclick="showPage('lupaPassword')">Lupa Password?</span>
           </div>
-          <button type="submit" class="btn btn-primary btn-block">
-            <i class="fas fa-sign-in-alt"></i> Masuk
-          </button>
+          <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-sign-in-alt"></i> Masuk</button>
         </form>
         <div class="auth-divider"><span>atau</span></div>
-        <p class="auth-switch">Belum punya akun? <a href="#" class="link-text" onclick="showPage('register')">Daftar Sekarang</a></p>
-        <div class="demo-hint">
-          <i class="fas fa-info-circle"></i>
-          <span>Demo: <b>admin@cekmotorapp.com</b> / <b>admin123</b></span>
-        </div>
+        <p class="auth-switch">Belum punya akun? <span class="link-text" onclick="showPage('register')">Daftar Sekarang</span></p>
+        <div class="demo-hint"><i class="fas fa-info-circle"></i> Demo Admin: <b>admin@cekmotorapp.com</b> / <b>admin123</b></div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ==============================
-     PAGE: REGISTER
-================================= -->
-<div id="page-register" class="page auth-page">
-  <div class="auth-container">
+  <!-- REGISTER -->
+  <div id="auth-register" class="auth-screen">
     <div class="auth-left">
       <div class="auth-brand">
         <i class="fas fa-motorcycle fa-3x"></i>
@@ -139,16 +87,16 @@
         <p>Bergabunglah dan mulai rawat motor Anda lebih cerdas</p>
       </div>
       <div class="auth-features">
-        <div class="auth-feature-item"><i class="fas fa-shield-alt"></i><span>Data Anda aman & terenkripsi</span></div>
-        <div class="auth-feature-item"><i class="fas fa-mobile-alt"></i><span>Akses dari perangkat apapun</span></div>
-        <div class="auth-feature-item"><i class="fas fa-history"></i><span>Riwayat pengecekan tersimpan</span></div>
-        <div class="auth-feature-item"><i class="fas fa-star"></i><span>Gratis selamanya</span></div>
+        <div class="auth-feat-item"><i class="fas fa-shield-alt"></i><span>Data Anda aman & terenkripsi</span></div>
+        <div class="auth-feat-item"><i class="fas fa-cloud"></i><span>Tersimpan di cloud Firebase</span></div>
+        <div class="auth-feat-item"><i class="fas fa-mobile-alt"></i><span>Akses dari perangkat apapun</span></div>
+        <div class="auth-feat-item"><i class="fas fa-star"></i><span>Gratis selamanya</span></div>
       </div>
     </div>
     <div class="auth-right">
       <div class="auth-card">
         <h2>Buat Akun Baru</h2>
-        <p class="auth-subtitle">Isi data diri Anda di bawah ini</p>
+        <p class="auth-sub">Isi data diri Anda di bawah ini</p>
         <form id="registerForm" onsubmit="handleRegister(event)">
           <div class="form-group">
             <label><i class="fas fa-user"></i> Nama Lengkap</label>
@@ -172,599 +120,463 @@
               <button type="button" onclick="togglePassword('regConfirm')"><i class="fas fa-eye"></i></button>
             </div>
           </div>
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input type="checkbox" id="regAgree" required />
-              Saya setuju dengan <a href="#" class="link-text">Syarat & Ketentuan</a>
-            </label>
-          </div>
-          <button type="submit" class="btn btn-primary btn-block">
-            <i class="fas fa-user-plus"></i> Daftar Sekarang
-          </button>
+          <label class="check-label" style="margin-bottom:16px">
+            <input type="checkbox" id="regAgree" required />
+            Saya setuju dengan <span class="link-text">Syarat & Ketentuan</span>
+          </label>
+          <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-user-plus"></i> Daftar Sekarang</button>
         </form>
-        <p class="auth-switch">Sudah punya akun? <a href="#" class="link-text" onclick="showPage('login')">Masuk di sini</a></p>
+        <p class="auth-switch">Sudah punya akun? <span class="link-text" onclick="showPage('login')">Masuk di sini</span></p>
       </div>
     </div>
   </div>
-</div>
 
-<!-- ==============================
-     PAGE: LUPA PASSWORD
-================================= -->
-<div id="page-lupaPassword" class="page auth-page">
-  <div class="auth-container centered">
-    <div class="auth-right">
-      <div class="auth-card">
-        <div class="back-btn" onclick="showPage('login')"><i class="fas fa-arrow-left"></i> Kembali ke Login</div>
-        <div class="icon-circle"><i class="fas fa-key"></i></div>
-        <h2>Lupa Password?</h2>
-        <p class="auth-subtitle">Masukkan email Anda untuk menerima link reset password</p>
-        <form onsubmit="handleForgotPassword(event)">
-          <div class="form-group">
-            <label><i class="fas fa-envelope"></i> Email Terdaftar</label>
-            <input type="email" id="forgotEmail" placeholder="Masukkan email terdaftar" required />
-          </div>
-          <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-paper-plane"></i> Kirim Link Reset</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ==============================
-     PAGE: DASHBOARD
-================================= -->
-<div id="page-dashboard" class="page app-page">
-  <div class="page-content">
-    <div class="page-header">
-      <div>
-        <h1 id="dashGreeting">Selamat Datang!</h1>
-        <p class="page-subtitle" id="dashDate">Hari ini, Rabu 4 Juni 2025</p>
-      </div>
-      <button class="btn btn-primary" onclick="showPage('dataMotor')"><i class="fas fa-plus"></i> Tambah Motor</button>
-    </div>
-
-    <!-- Summary Cards -->
-    <div class="stats-grid">
-      <div class="stat-card stat-blue">
-        <div class="stat-icon"><i class="fas fa-motorcycle"></i></div>
-        <div class="stat-info">
-          <div class="stat-value" id="statMotorCount">0</div>
-          <div class="stat-label">Motor Terdaftar</div>
-        </div>
-      </div>
-      <div class="stat-card stat-green">
-        <div class="stat-icon"><i class="fas fa-clipboard-check"></i></div>
-        <div class="stat-info">
-          <div class="stat-value" id="statCheckCount">0</div>
-          <div class="stat-label">Total Pengecekan</div>
-        </div>
-      </div>
-      <div class="stat-card stat-orange">
-        <div class="stat-icon"><i class="fas fa-bell"></i></div>
-        <div class="stat-info">
-          <div class="stat-value" id="statReminderCount">0</div>
-          <div class="stat-label">Pengingat Aktif</div>
-        </div>
-      </div>
-      <div class="stat-card stat-purple">
-        <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
-        <div class="stat-info">
-          <div class="stat-value" id="statNextService">-</div>
-          <div class="stat-label">Servis Berikutnya</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Status Motor Terakhir -->
-    <div class="section-title"><i class="fas fa-tachometer-alt"></i> Status Motor Terakhir</div>
-    <div id="lastMotorStatus" class="last-status-card">
-      <div class="empty-state">
-        <i class="fas fa-motorcycle fa-3x"></i>
-        <p>Belum ada data motor. <a href="#" onclick="showPage('dataMotor')">Tambah motor sekarang</a></p>
-      </div>
-    </div>
-
-    <!-- Menu Utama -->
-    <div class="section-title"><i class="fas fa-th-large"></i> Menu Utama</div>
-    <div class="menu-grid">
-      <div class="menu-card" onclick="showPage('dataMotor')">
-        <div class="menu-icon" style="background:var(--blue-light)"><i class="fas fa-motorcycle" style="color:var(--blue)"></i></div>
-        <div class="menu-label">Data Motor</div>
-        <div class="menu-desc">Kelola data kendaraan Anda</div>
-        <i class="fas fa-chevron-right menu-arrow"></i>
-      </div>
-      <div class="menu-card" onclick="showPage('checklistKondisi')">
-        <div class="menu-icon" style="background:#e8f5e9"><i class="fas fa-clipboard-check" style="color:#2e7d32"></i></div>
-        <div class="menu-label">Cek Kondisi Motor</div>
-        <div class="menu-desc">Periksa kondisi komponen motor</div>
-        <i class="fas fa-chevron-right menu-arrow"></i>
-      </div>
-      <div class="menu-card" onclick="showPage('hasilAnalisis')">
-        <div class="menu-icon" style="background:#fff3e0"><i class="fas fa-chart-bar" style="color:#e65100"></i></div>
-        <div class="menu-label">Hasil Pengecekan</div>
-        <div class="menu-desc">Lihat hasil analisis kondisi</div>
-        <i class="fas fa-chevron-right menu-arrow"></i>
-      </div>
-      <div class="menu-card" onclick="showPage('rekomendasiBengkel')">
-        <div class="menu-icon" style="background:#f3e5f5"><i class="fas fa-wrench" style="color:#6a1b9a"></i></div>
-        <div class="menu-label">Rekomendasi Bengkel</div>
-        <div class="menu-desc">Temukan bengkel terpercaya</div>
-        <i class="fas fa-chevron-right menu-arrow"></i>
-      </div>
-      <div class="menu-card" onclick="showPage('pengingatServis')">
-        <div class="menu-icon" style="background:#fce4ec"><i class="fas fa-bell" style="color:#c62828"></i></div>
-        <div class="menu-label">Pengingat Servis</div>
-        <div class="menu-desc">Atur jadwal servis berkala</div>
-        <i class="fas fa-chevron-right menu-arrow"></i>
-      </div>
-      <div class="menu-card" onclick="showPage('riwayatPengecekan')">
-        <div class="menu-icon" style="background:#e3f2fd"><i class="fas fa-history" style="color:#1565c0"></i></div>
-        <div class="menu-label">Riwayat Pengecekan</div>
-        <div class="menu-desc">Cek histori servis motor</div>
-        <i class="fas fa-chevron-right menu-arrow"></i>
-      </div>
-    </div>
-
-    <!-- Tips -->
-    <div class="tips-card">
-      <div class="tips-icon"><i class="fas fa-lightbulb"></i></div>
-      <div class="tips-content">
-        <div class="tips-title">Tips Merawat Motor</div>
-        <div class="tips-text" id="tipText">Ganti oli mesin setiap 2.000–3.000 km atau minimal 3 bulan sekali agar mesin tetap prima.</div>
-      </div>
-      <button class="tips-next" onclick="nextTip()"><i class="fas fa-refresh"></i></button>
-    </div>
-  </div>
-</div>
-
-<!-- ==============================
-     PAGE: DATA MOTOR
-================================= -->
-<div id="page-dataMotor" class="page app-page">
-  <div class="page-content">
-    <div class="page-header">
-      <div>
-        <h1><i class="fas fa-motorcycle"></i> Data Motor</h1>
-        <p class="page-subtitle">Kelola data kendaraan Anda</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><i class="fas fa-plus-circle"></i> Tambah / Edit Data Motor</div>
-      <div class="card-body">
-        <form id="motorForm" onsubmit="saveMotorData(event)">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Merek Motor <span class="required">*</span></label>
-              <select id="motorMerek" required>
-                <option value="">-- Pilih Merek --</option>
-                <option>Honda</option><option>Yamaha</option><option>Suzuki</option>
-                <option>Kawasaki</option><option>TVS</option><option>Lainnya</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Tipe / Model Motor <span class="required">*</span></label>
-              <input type="text" id="motorTipe" placeholder="Contoh: Vario 125, NMAX, Mio" required />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Tahun Kendaraan <span class="required">*</span></label>
-              <input type="number" id="motorTahun" placeholder="Contoh: 2022" min="1990" max="2025" required />
-            </div>
-            <div class="form-group">
-              <label>Nomor Polisi <span class="required">*</span></label>
-              <input type="text" id="motorNopol" placeholder="Contoh: B 1234 ABC" required style="text-transform:uppercase" />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Kilometer / Jarak Tempuh (km) <span class="required">*</span></label>
-              <input type="number" id="motorKm" placeholder="Contoh: 15000" min="0" required />
-            </div>
-            <div class="form-group">
-              <label>Warna Motor</label>
-              <input type="text" id="motorWarna" placeholder="Contoh: Merah" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Catatan Tambahan</label>
-            <textarea id="motorCatatan" placeholder="Contoh: Motor sudah ganti ban depan bulan lalu..." rows="3"></textarea>
-          </div>
-          <div class="form-actions">
-            <button type="reset" class="btn btn-outline" onclick="resetMotorForm()"><i class="fas fa-undo"></i> Reset</button>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Data Motor</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Daftar Motor -->
-    <div class="section-title"><i class="fas fa-list"></i> Daftar Motor Terdaftar</div>
-    <div id="motorList" class="motor-list"></div>
-  </div>
-</div>
-
-<!-- ==============================
-     PAGE: CHECKLIST KONDISI
-================================= -->
-<div id="page-checklistKondisi" class="page app-page">
-  <div class="page-content">
-    <div class="page-header">
-      <div>
-        <h1><i class="fas fa-clipboard-check"></i> Cek Kondisi Motor</h1>
-        <p class="page-subtitle">Isi checklist kondisi komponen motor Anda</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><i class="fas fa-motorcycle"></i> Pilih Motor yang Akan Dicek</div>
-      <div class="card-body">
+  <!-- LUPA PASSWORD -->
+  <div id="auth-lupaPassword" class="auth-screen auth-center">
+    <div class="auth-card" style="max-width:440px;width:100%">
+      <div class="back-btn" onclick="showPage('login')"><i class="fas fa-arrow-left"></i> Kembali ke Login</div>
+      <div class="icon-circle"><i class="fas fa-key"></i></div>
+      <h2 style="text-align:center">Lupa Password?</h2>
+      <p class="auth-sub" style="text-align:center">Masukkan email Anda untuk menerima link reset password</p>
+      <form onsubmit="handleForgotPassword(event)">
         <div class="form-group">
-          <label>Motor</label>
-          <select id="checkMotorSelect">
-            <option value="">-- Pilih Motor --</option>
-          </select>
+          <label><i class="fas fa-envelope"></i> Email Terdaftar</label>
+          <input type="email" id="forgotEmail" placeholder="Masukkan email terdaftar" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-paper-plane"></i> Kirim Link Reset</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN LOGIN -->
+  <div id="auth-adminLogin" class="auth-screen auth-center">
+    <div class="auth-card" style="max-width:440px;width:100%">
+      <div class="back-btn" onclick="showPage('login')"><i class="fas fa-arrow-left"></i> Kembali</div>
+      <div class="icon-circle" style="background:#fff3e0;color:#e65100"><i class="fas fa-shield-alt"></i></div>
+      <h2 style="text-align:center">Admin Panel</h2>
+      <p class="auth-sub" style="text-align:center">Masuk sebagai administrator</p>
+      <form onsubmit="handleAdminLogin(event)">
+        <div class="form-group">
+          <label><i class="fas fa-user-shield"></i> Admin Email</label>
+          <input type="text" id="adminEmail" placeholder="admin@cekmotorapp.com" required />
         </div>
         <div class="form-group">
-          <label>Kilometer Saat Ini (km)</label>
-          <input type="number" id="checkKm" placeholder="Masukkan km saat ini" min="0" />
+          <label><i class="fas fa-lock"></i> Password Admin</label>
+          <div class="input-eye">
+            <input type="password" id="adminPassword" required />
+            <button type="button" onclick="togglePassword('adminPassword')"><i class="fas fa-eye"></i></button>
+          </div>
         </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><i class="fas fa-list-check"></i> Checklist Komponen Motor</div>
-      <div class="card-body">
-        <p class="checklist-hint"><i class="fas fa-info-circle"></i> Pilih kondisi setiap komponen dengan jujur sesuai kondisi aktual motor Anda.</p>
-        <div class="checklist-grid" id="checklistGrid">
-          <!-- Generated by JS -->
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><i class="fas fa-sticky-note"></i> Catatan Tambahan</div>
-      <div class="card-body">
-        <textarea id="checkCatatan" placeholder="Tambahkan catatan tambahan tentang kondisi motor Anda..." rows="4"></textarea>
-      </div>
-    </div>
-
-    <div class="form-actions">
-      <button class="btn btn-outline" onclick="resetChecklist()"><i class="fas fa-undo"></i> Reset Checklist</button>
-      <button class="btn btn-primary" onclick="analyzeCondition()"><i class="fas fa-search-plus"></i> Analisis Kondisi Motor</button>
+        <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-sign-in-alt"></i> Masuk Admin</button>
+      </form>
+      <div class="demo-hint"><i class="fas fa-info-circle"></i> Demo: <b>admin@cekmotorapp.com</b> / <b>admin123</b></div>
     </div>
   </div>
-</div>
 
-<!-- ==============================
-     PAGE: HASIL ANALISIS
-================================= -->
-<div id="page-hasilAnalisis" class="page app-page">
-  <div class="page-content">
-    <div class="page-header">
+</div><!-- end authWrapper -->
+
+
+<!-- ================================================
+     APP SHELL — tampil setelah login
+================================================= -->
+<div id="appShell" class="hidden">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><i class="fas fa-motorcycle"></i><span>CekMotorAPP</span></div>
+      <button class="sidebar-close-btn" onclick="toggleSidebar()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="sidebar-user">
+      <div class="avatar" id="sidebarAvatar">U</div>
       <div>
-        <h1><i class="fas fa-chart-bar"></i> Hasil Analisis</h1>
-        <p class="page-subtitle">Ringkasan kondisi motor Anda</p>
-      </div>
-      <button class="btn btn-outline" onclick="showPage('checklistKondisi')"><i class="fas fa-redo"></i> Cek Ulang</button>
-    </div>
-
-    <div id="hasilContent">
-      <div class="empty-state-center">
-        <i class="fas fa-chart-bar fa-3x"></i>
-        <h3>Belum Ada Hasil Analisis</h3>
-        <p>Lakukan pengecekan kondisi motor terlebih dahulu</p>
-        <button class="btn btn-primary" onclick="showPage('checklistKondisi')"><i class="fas fa-clipboard-check"></i> Mulai Pengecekan</button>
+        <div class="sidebar-uname" id="sidebarUsername">User</div>
+        <div class="sidebar-urole" id="sidebarRole">Pengguna</div>
       </div>
     </div>
-  </div>
-</div>
-
-<!-- ==============================
-     PAGE: REKOMENDASI BENGKEL
-================================= -->
-<div id="page-rekomendasiBengkel" class="page app-page">
-  <div class="page-content">
-    <div class="page-header">
-      <div>
-        <h1><i class="fas fa-wrench"></i> Rekomendasi Bengkel</h1>
-        <p class="page-subtitle">Bengkel terpercaya di sekitar Anda</p>
-      </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <button class="nav-item" onclick="showPage('dashboard')"><i class="fas fa-home"></i><span>Dashboard</span></button>
+      <button class="nav-item" onclick="showPage('dataMotor')"><i class="fas fa-motorcycle"></i><span>Data Motor</span></button>
+      <button class="nav-item" onclick="showPage('checklistKondisi')"><i class="fas fa-clipboard-check"></i><span>Cek Kondisi</span></button>
+      <button class="nav-item" onclick="showPage('hasilAnalisis')"><i class="fas fa-chart-bar"></i><span>Hasil Pengecekan</span></button>
+      <button class="nav-item" onclick="showPage('rekomendasiBengkel')"><i class="fas fa-wrench"></i><span>Rekomendasi Bengkel</span></button>
+      <button class="nav-item" onclick="showPage('pengingatServis')"><i class="fas fa-bell"></i><span>Pengingat Servis</span></button>
+      <button class="nav-item" onclick="showPage('riwayatPengecekan')"><i class="fas fa-history"></i><span>Riwayat</span></button>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="nav-item logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button>
     </div>
+  </aside>
+  <div id="sidebarOverlay" class="sidebar-overlay hidden" onclick="toggleSidebar()"></div>
 
-    <div class="search-bar">
-      <i class="fas fa-search"></i>
-      <input type="text" id="bengkelSearch" placeholder="Cari nama bengkel atau lokasi..." oninput="filterBengkel()" />
-    </div>
+  <!-- MAIN AREA -->
+  <div id="appMain">
 
-    <div class="filter-tabs">
-      <button class="filter-tab active" onclick="filterByType('all', this)">Semua</button>
-      <button class="filter-tab" onclick="filterByType('resmi', this)">Bengkel Resmi</button>
-      <button class="filter-tab" onclick="filterByType('umum', this)">Bengkel Umum</button>
-    </div>
-
-    <div id="bengkelGrid" class="bengkel-grid"></div>
-  </div>
-</div>
-
-<!-- ==============================
-     PAGE: PENGINGAT SERVIS
-================================= -->
-<div id="page-pengingatServis" class="page app-page">
-  <div class="page-content">
-    <div class="page-header">
-      <div>
-        <h1><i class="fas fa-bell"></i> Pengingat Servis</h1>
-        <p class="page-subtitle">Atur jadwal servis berkala motor Anda</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><i class="fas fa-plus-circle"></i> Tambah Pengingat Baru</div>
-      <div class="card-body">
-        <form id="reminderForm" onsubmit="saveReminder(event)">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Pilih Motor</label>
-              <select id="reminderMotor">
-                <option value="">-- Pilih Motor --</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Jenis Pengingat</label>
-              <select id="reminderJenis">
-                <option value="Ganti Oli">Ganti Oli</option>
-                <option value="Servis Rutin">Servis Rutin</option>
-                <option value="Cek Rem">Cek Rem</option>
-                <option value="Cek Ban">Cek Ban</option>
-                <option value="Ganti Aki">Ganti Aki</option>
-                <option value="Servis Besar">Servis Besar</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Tanggal Servis Terakhir</label>
-              <input type="date" id="reminderLastDate" />
-            </div>
-            <div class="form-group">
-              <label>Kilometer Terakhir Servis (km)</label>
-              <input type="number" id="reminderLastKm" placeholder="Contoh: 12000" min="0" />
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Tanggal Servis Berikutnya</label>
-              <input type="date" id="reminderNextDate" />
-            </div>
-            <div class="form-group">
-              <label>Target Km Berikutnya</label>
-              <input type="number" id="reminderNextKm" placeholder="Contoh: 15000" min="0" />
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Catatan</label>
-            <input type="text" id="reminderNote" placeholder="Catatan tambahan..." />
-          </div>
-          <div class="form-actions">
-            <button type="reset" class="btn btn-outline"><i class="fas fa-undo"></i> Reset</button>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-bell"></i> Simpan Pengingat</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <div class="section-title"><i class="fas fa-list"></i> Daftar Pengingat</div>
-    <div id="reminderList"></div>
-  </div>
-</div>
-
-<!-- ==============================
-     PAGE: RIWAYAT PENGECEKAN
-================================= -->
-<div id="page-riwayatPengecekan" class="page app-page">
-  <div class="page-content">
-    <div class="page-header">
-      <div>
-        <h1><i class="fas fa-history"></i> Riwayat Pengecekan</h1>
-        <p class="page-subtitle">Histori pengecekan kondisi motor Anda</p>
-      </div>
-      <button class="btn btn-danger-outline" onclick="confirmClearHistory()"><i class="fas fa-trash"></i> Hapus Semua</button>
-    </div>
-
-    <div class="card">
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="data-table" id="historyTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Tanggal</th>
-                <th>Motor</th>
-                <th>Kilometer</th>
-                <th>Status</th>
-                <th>Rekomendasi</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="historyBody"></tbody>
-          </table>
+    <!-- TOPBAR -->
+    <header id="topbar">
+      <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+      <div class="topbar-brand"><i class="fas fa-motorcycle"></i> CekMotorAPP</div>
+      <div class="topbar-right">
+        <div class="notif-btn" onclick="showPage('pengingatServis')">
+          <i class="fas fa-bell"></i>
+          <span class="notif-badge" id="notifBadge">0</span>
         </div>
-        <div id="historyEmpty" class="empty-state-center hidden">
-          <i class="fas fa-history fa-3x"></i>
-          <h3>Belum Ada Riwayat</h3>
-          <p>Lakukan pengecekan kondisi motor untuk melihat riwayat</p>
-          <button class="btn btn-primary" onclick="showPage('checklistKondisi')">Mulai Pengecekan</button>
-        </div>
+        <div class="topbar-avatar" id="topbarAvatar">U</div>
       </div>
-    </div>
-  </div>
-</div>
+    </header>
 
-<!-- ==============================
-     PAGE: ADMIN LOGIN
-================================= -->
-<div id="page-adminLogin" class="page auth-page">
-  <div class="auth-container centered">
-    <div class="auth-right">
-      <div class="auth-card">
-        <div class="back-btn" onclick="showPage('login')"><i class="fas fa-arrow-left"></i> Kembali</div>
-        <div class="icon-circle admin-icon"><i class="fas fa-shield-alt"></i></div>
-        <h2>Admin Panel</h2>
-        <p class="auth-subtitle">Masuk sebagai administrator</p>
-        <form onsubmit="handleAdminLogin(event)">
-          <div class="form-group">
-            <label><i class="fas fa-user-shield"></i> Admin Email</label>
-            <input type="text" id="adminEmail" placeholder="admin@cekmotorapp.com" required />
+    <!-- CONTENT AREA (hanya bagian ini yang berganti) -->
+    <main id="contentArea">
+
+      <!-- ========== DASHBOARD ========== -->
+      <div id="sec-dashboard" class="app-section active">
+        <div class="page-header">
+          <div>
+            <h1 id="dashGreeting">Selamat Datang!</h1>
+            <p class="page-sub" id="dashDate"></p>
           </div>
-          <div class="form-group">
-            <label><i class="fas fa-lock"></i> Password Admin</label>
-            <div class="input-eye">
-              <input type="password" id="adminPassword" placeholder="Masukkan password admin" required />
-              <button type="button" onclick="togglePassword('adminPassword')"><i class="fas fa-eye"></i></button>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-sign-in-alt"></i> Masuk Admin</button>
-        </form>
-        <div class="demo-hint">
-          <i class="fas fa-info-circle"></i>
-          <span>Demo: <b>admin@cekmotorapp.com</b> / <b>admin123</b></span>
+          <button class="btn btn-primary" onclick="showPage('dataMotor')"><i class="fas fa-plus"></i> Tambah Motor</button>
         </div>
-      </div>
-    </div>
-  </div>
-</div>
 
-<!-- ==============================
-     PAGE: ADMIN DASHBOARD
-================================= -->
-<div id="page-adminDashboard" class="page app-page">
-  <div class="page-content">
-    <div class="page-header">
-      <div>
-        <h1><i class="fas fa-shield-alt"></i> Admin Dashboard</h1>
-        <p class="page-subtitle">Panel administrasi CekMotorAPP</p>
-      </div>
-      <button class="btn btn-danger-outline" onclick="adminLogout()"><i class="fas fa-sign-out-alt"></i> Logout Admin</button>
-    </div>
-
-    <div class="admin-tabs">
-      <button class="admin-tab active" onclick="switchAdminTab('users', this)"><i class="fas fa-users"></i> Data Pengguna</button>
-      <button class="admin-tab" onclick="switchAdminTab('motors', this)"><i class="fas fa-motorcycle"></i> Data Motor</button>
-      <button class="admin-tab" onclick="switchAdminTab('checks', this)"><i class="fas fa-clipboard-check"></i> Hasil Pengecekan</button>
-      <button class="admin-tab" onclick="switchAdminTab('bengkel', this)"><i class="fas fa-wrench"></i> Kelola Bengkel</button>
-      <button class="admin-tab" onclick="switchAdminTab('biaya', this)"><i class="fas fa-money-bill"></i> Estimasi Biaya</button>
-    </div>
-
-    <!-- Tab: Users -->
-    <div id="adminTab-users" class="admin-tab-content active">
-      <div class="card">
-        <div class="card-header"><i class="fas fa-users"></i> Data Pengguna Terdaftar</div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="data-table" id="adminUsersTable">
-              <thead><tr><th>#</th><th>Nama</th><th>Email</th><th>Jumlah Motor</th><th>Total Pengecekan</th><th>Bergabung</th></tr></thead>
-              <tbody id="adminUsersBody"></tbody>
-            </table>
+        <div class="stats-grid">
+          <div class="stat-card stat-blue">
+            <div class="stat-icon"><i class="fas fa-motorcycle"></i></div>
+            <div><div class="stat-val" id="statMotorCount">0</div><div class="stat-lbl">Motor Terdaftar</div></div>
+          </div>
+          <div class="stat-card stat-green">
+            <div class="stat-icon"><i class="fas fa-clipboard-check"></i></div>
+            <div><div class="stat-val" id="statCheckCount">0</div><div class="stat-lbl">Total Pengecekan</div></div>
+          </div>
+          <div class="stat-card stat-orange">
+            <div class="stat-icon"><i class="fas fa-bell"></i></div>
+            <div><div class="stat-val" id="statReminderCount">0</div><div class="stat-lbl">Pengingat Aktif</div></div>
+          </div>
+          <div class="stat-card stat-purple">
+            <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+            <div><div class="stat-val" id="statNextService">-</div><div class="stat-lbl">Servis Berikutnya</div></div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Tab: Motors -->
-    <div id="adminTab-motors" class="admin-tab-content">
-      <div class="card">
-        <div class="card-header"><i class="fas fa-motorcycle"></i> Data Motor Semua Pengguna</div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="data-table">
-              <thead><tr><th>#</th><th>Pemilik</th><th>Merek</th><th>Tipe</th><th>Tahun</th><th>Nopol</th><th>Kilometer</th></tr></thead>
-              <tbody id="adminMotorsBody"></tbody>
-            </table>
+        <div class="sec-title"><i class="fas fa-tachometer-alt"></i> Status Motor Terakhir</div>
+        <div id="lastMotorStatus" class="last-status-card">
+          <div class="empty-state"><i class="fas fa-motorcycle fa-3x"></i><p>Belum ada data motor. <span class="link-text" onclick="showPage('dataMotor')">Tambah motor sekarang</span></p></div>
+        </div>
+
+        <div class="sec-title"><i class="fas fa-th-large"></i> Menu Utama</div>
+        <div class="menu-grid">
+          <div class="menu-card" onclick="showPage('dataMotor')">
+            <div class="menu-icon" style="background:var(--blue-light)"><i class="fas fa-motorcycle" style="color:var(--blue)"></i></div>
+            <div><div class="menu-lbl">Data Motor</div><div class="menu-desc">Kelola data kendaraan Anda</div></div>
+            <i class="fas fa-chevron-right menu-arrow"></i>
+          </div>
+          <div class="menu-card" onclick="showPage('checklistKondisi')">
+            <div class="menu-icon" style="background:#e8f5e9"><i class="fas fa-clipboard-check" style="color:#2e7d32"></i></div>
+            <div><div class="menu-lbl">Cek Kondisi Motor</div><div class="menu-desc">Periksa kondisi komponen</div></div>
+            <i class="fas fa-chevron-right menu-arrow"></i>
+          </div>
+          <div class="menu-card" onclick="showPage('hasilAnalisis')">
+            <div class="menu-icon" style="background:#fff3e0"><i class="fas fa-chart-bar" style="color:#e65100"></i></div>
+            <div><div class="menu-lbl">Hasil Pengecekan</div><div class="menu-desc">Lihat hasil analisis kondisi</div></div>
+            <i class="fas fa-chevron-right menu-arrow"></i>
+          </div>
+          <div class="menu-card" onclick="showPage('rekomendasiBengkel')">
+            <div class="menu-icon" style="background:#f3e5f5"><i class="fas fa-wrench" style="color:#6a1b9a"></i></div>
+            <div><div class="menu-lbl">Rekomendasi Bengkel</div><div class="menu-desc">Temukan bengkel terpercaya</div></div>
+            <i class="fas fa-chevron-right menu-arrow"></i>
+          </div>
+          <div class="menu-card" onclick="showPage('pengingatServis')">
+            <div class="menu-icon" style="background:#fce4ec"><i class="fas fa-bell" style="color:#c62828"></i></div>
+            <div><div class="menu-lbl">Pengingat Servis</div><div class="menu-desc">Atur jadwal servis berkala</div></div>
+            <i class="fas fa-chevron-right menu-arrow"></i>
+          </div>
+          <div class="menu-card" onclick="showPage('riwayatPengecekan')">
+            <div class="menu-icon" style="background:#e3f2fd"><i class="fas fa-history" style="color:#1565c0"></i></div>
+            <div><div class="menu-lbl">Riwayat Pengecekan</div><div class="menu-desc">Cek histori servis motor</div></div>
+            <i class="fas fa-chevron-right menu-arrow"></i>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Tab: Checks -->
-    <div id="adminTab-checks" class="admin-tab-content">
-      <div class="card">
-        <div class="card-header"><i class="fas fa-clipboard-check"></i> Hasil Pengecekan Semua Pengguna</div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="data-table">
-              <thead><tr><th>#</th><th>Pengguna</th><th>Motor</th><th>Tanggal</th><th>Status</th><th>Komponen Bermasalah</th></tr></thead>
-              <tbody id="adminChecksBody"></tbody>
-            </table>
+        <div class="tips-card">
+          <div class="tips-icon"><i class="fas fa-lightbulb"></i></div>
+          <div class="tips-content">
+            <div class="tips-title">Tips Merawat Motor</div>
+            <div class="tips-text" id="tipText">Ganti oli mesin setiap 2.000–3.000 km atau minimal 3 bulan sekali agar mesin tetap prima.</div>
           </div>
+          <button class="tips-next" onclick="nextTip()"><i class="fas fa-sync-alt"></i></button>
         </div>
       </div>
-    </div>
 
-    <!-- Tab: Bengkel -->
-    <div id="adminTab-bengkel" class="admin-tab-content">
-      <div class="card">
-        <div class="card-header"><i class="fas fa-plus-circle"></i> Tambah / Kelola Bengkel</div>
-        <div class="card-body">
-          <form onsubmit="addBengkel(event)">
+      <!-- ========== DATA MOTOR ========== -->
+      <div id="sec-dataMotor" class="app-section">
+        <div class="page-header">
+          <div><h1><i class="fas fa-motorcycle"></i> Data Motor</h1><p class="page-sub">Kelola data kendaraan Anda</p></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><i class="fas fa-plus-circle"></i> Tambah / Edit Data Motor</div>
+          <div class="card-body">
+            <form id="motorForm" onsubmit="saveMotorData(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Merek Motor <span class="req">*</span></label>
+                  <select id="motorMerek" required>
+                    <option value="">-- Pilih Merek --</option>
+                    <option>Honda</option><option>Yamaha</option><option>Suzuki</option><option>Kawasaki</option><option>TVS</option><option>Lainnya</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Tipe / Model <span class="req">*</span></label>
+                  <input type="text" id="motorTipe" placeholder="Contoh: Vario 125, NMAX, Mio" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Tahun Kendaraan <span class="req">*</span></label>
+                  <input type="number" id="motorTahun" placeholder="Contoh: 2022" min="1990" max="2025" required />
+                </div>
+                <div class="form-group">
+                  <label>Nomor Polisi <span class="req">*</span></label>
+                  <input type="text" id="motorNopol" placeholder="Contoh: B 1234 ABC" required style="text-transform:uppercase" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Kilometer / Jarak Tempuh <span class="req">*</span></label>
+                  <input type="number" id="motorKm" placeholder="Contoh: 15000" min="0" required />
+                </div>
+                <div class="form-group">
+                  <label>Warna Motor</label>
+                  <input type="text" id="motorWarna" placeholder="Contoh: Merah" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Catatan Tambahan</label>
+                <textarea id="motorCatatan" placeholder="Tambahkan catatan tentang kondisi motor..." rows="3"></textarea>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn btn-outline" onclick="resetMotorForm()"><i class="fas fa-undo"></i> Reset</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan Data Motor</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="sec-title"><i class="fas fa-list"></i> Daftar Motor Terdaftar</div>
+        <div id="motorList" class="motor-list"></div>
+      </div>
+
+      <!-- ========== CHECKLIST KONDISI ========== -->
+      <div id="sec-checklistKondisi" class="app-section">
+        <div class="page-header">
+          <div><h1><i class="fas fa-clipboard-check"></i> Cek Kondisi Motor</h1><p class="page-sub">Isi checklist kondisi komponen motor Anda</p></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><i class="fas fa-motorcycle"></i> Pilih Motor yang Akan Dicek</div>
+          <div class="card-body">
             <div class="form-row">
               <div class="form-group">
-                <label>Nama Bengkel</label>
-                <input type="text" id="adminBengkelNama" placeholder="Nama bengkel" required />
+                <label>Motor</label>
+                <select id="checkMotorSelect"><option value="">-- Pilih Motor --</option></select>
               </div>
               <div class="form-group">
-                <label>Tipe</label>
-                <select id="adminBengkelTipe">
-                  <option value="resmi">Bengkel Resmi</option>
-                  <option value="umum">Bengkel Umum</option>
-                </select>
+                <label>Kilometer Saat Ini (km)</label>
+                <input type="number" id="checkKm" placeholder="Masukkan km saat ini" min="0" />
               </div>
             </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Alamat</label>
-                <input type="text" id="adminBengkelAlamat" placeholder="Alamat lengkap" required />
-              </div>
-              <div class="form-group">
-                <label>Jam Buka</label>
-                <input type="text" id="adminBengkelJam" placeholder="Contoh: 08:00 - 17:00" required />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Nomor Telepon</label>
-                <input type="text" id="adminBengkelTelp" placeholder="Nomor WhatsApp/HP" />
-              </div>
-              <div class="form-group">
-                <label>Jarak dari Pusat Kota</label>
-                <input type="text" id="adminBengkelJarak" placeholder="Contoh: 1.2 km" />
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Tambah Bengkel</button>
-          </form>
-          <hr style="margin:20px 0; border-color:var(--border)">
-          <div id="adminBengkelList"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><i class="fas fa-list-check"></i> Checklist Komponen Motor</div>
+          <div class="card-body">
+            <div class="checklist-hint"><i class="fas fa-info-circle"></i> Pilih kondisi setiap komponen sesuai kondisi aktual motor Anda.</div>
+            <div class="checklist-grid" id="checklistGrid"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><i class="fas fa-sticky-note"></i> Catatan Tambahan</div>
+          <div class="card-body">
+            <textarea id="checkCatatan" placeholder="Tambahkan catatan tambahan tentang kondisi motor Anda..." rows="4"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-outline" onclick="resetChecklist()"><i class="fas fa-undo"></i> Reset Checklist</button>
+          <button class="btn btn-primary" onclick="analyzeCondition()"><i class="fas fa-search-plus"></i> Analisis Kondisi Motor</button>
         </div>
       </div>
-    </div>
 
-    <!-- Tab: Biaya -->
-    <div id="adminTab-biaya" class="admin-tab-content">
-      <div class="card">
-        <div class="card-header"><i class="fas fa-money-bill-wave"></i> Kelola Estimasi Biaya Servis</div>
-        <div class="card-body">
-          <div id="biayaEditList"></div>
+      <!-- ========== HASIL ANALISIS ========== -->
+      <div id="sec-hasilAnalisis" class="app-section">
+        <div class="page-header">
+          <div><h1><i class="fas fa-chart-bar"></i> Hasil Analisis</h1><p class="page-sub">Ringkasan kondisi motor Anda</p></div>
+          <button class="btn btn-outline" onclick="showPage('checklistKondisi')"><i class="fas fa-redo"></i> Cek Ulang</button>
+        </div>
+        <div id="hasilContent">
+          <div class="empty-state-center">
+            <i class="fas fa-chart-bar fa-3x"></i>
+            <h3>Belum Ada Hasil Analisis</h3>
+            <p>Lakukan pengecekan kondisi motor terlebih dahulu</p>
+            <button class="btn btn-primary" onclick="showPage('checklistKondisi')"><i class="fas fa-clipboard-check"></i> Mulai Pengecekan</button>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
 
-<!-- ==============================
-     MODAL: DETAIL RIWAYAT
-================================= -->
+      <!-- ========== REKOMENDASI BENGKEL ========== -->
+      <div id="sec-rekomendasiBengkel" class="app-section">
+        <div class="page-header">
+          <div><h1><i class="fas fa-wrench"></i> Rekomendasi Bengkel</h1><p class="page-sub">Bengkel terpercaya di sekitar Anda</p></div>
+        </div>
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" id="bengkelSearch" placeholder="Cari nama bengkel atau lokasi..." oninput="filterBengkel()" />
+        </div>
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="filterByType('all',this)">Semua</button>
+          <button class="filter-tab" onclick="filterByType('resmi',this)">Bengkel Resmi</button>
+          <button class="filter-tab" onclick="filterByType('umum',this)">Bengkel Umum</button>
+        </div>
+        <div id="bengkelGrid" class="bengkel-grid"></div>
+      </div>
+
+      <!-- ========== PENGINGAT SERVIS ========== -->
+      <div id="sec-pengingatServis" class="app-section">
+        <div class="page-header">
+          <div><h1><i class="fas fa-bell"></i> Pengingat Servis</h1><p class="page-sub">Atur jadwal servis berkala motor Anda</p></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><i class="fas fa-plus-circle"></i> Tambah Pengingat Baru</div>
+          <div class="card-body">
+            <form id="reminderForm" onsubmit="saveReminder(event)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Pilih Motor</label>
+                  <select id="reminderMotor"><option value="">-- Pilih Motor --</option></select>
+                </div>
+                <div class="form-group">
+                  <label>Jenis Pengingat</label>
+                  <select id="reminderJenis">
+                    <option>Ganti Oli</option><option>Servis Rutin</option><option>Cek Rem</option>
+                    <option>Cek Ban</option><option>Ganti Aki</option><option>Servis Besar</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Tanggal Servis Terakhir</label>
+                  <input type="date" id="reminderLastDate" />
+                </div>
+                <div class="form-group">
+                  <label>Kilometer Terakhir (km)</label>
+                  <input type="number" id="reminderLastKm" placeholder="Contoh: 12000" min="0" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Tanggal Servis Berikutnya</label>
+                  <input type="date" id="reminderNextDate" />
+                </div>
+                <div class="form-group">
+                  <label>Target Km Berikutnya</label>
+                  <input type="number" id="reminderNextKm" placeholder="Contoh: 15000" min="0" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Catatan</label>
+                <input type="text" id="reminderNote" placeholder="Catatan tambahan..." />
+              </div>
+              <div class="form-actions">
+                <button type="reset" class="btn btn-outline"><i class="fas fa-undo"></i> Reset</button>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-bell"></i> Simpan Pengingat</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="sec-title"><i class="fas fa-list"></i> Daftar Pengingat</div>
+        <div id="reminderList"></div>
+      </div>
+
+      <!-- ========== RIWAYAT PENGECEKAN ========== -->
+      <div id="sec-riwayatPengecekan" class="app-section">
+        <div class="page-header">
+          <div><h1><i class="fas fa-history"></i> Riwayat Pengecekan</h1><p class="page-sub">Histori pengecekan kondisi motor Anda</p></div>
+          <button class="btn btn-danger-outline" onclick="confirmClearHistory()"><i class="fas fa-trash"></i> Hapus Semua</button>
+        </div>
+        <div class="card">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="data-table" id="historyTable">
+                <thead>
+                  <tr><th>#</th><th>Tanggal</th><th>Motor</th><th>Kilometer</th><th>Status</th><th>Bermasalah</th><th>Aksi</th></tr>
+                </thead>
+                <tbody id="historyBody"></tbody>
+              </table>
+            </div>
+            <div id="historyEmpty" class="empty-state-center hidden">
+              <i class="fas fa-history fa-3x"></i>
+              <h3>Belum Ada Riwayat</h3>
+              <p>Lakukan pengecekan kondisi motor untuk melihat riwayat</p>
+              <button class="btn btn-primary" onclick="showPage('checklistKondisi')">Mulai Pengecekan</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== ADMIN DASHBOARD ========== -->
+      <div id="sec-adminDashboard" class="app-section">
+        <div class="page-header">
+          <div><h1><i class="fas fa-shield-alt"></i> Admin Dashboard</h1><p class="page-sub">Panel administrasi CekMotorAPP</p></div>
+          <button class="btn btn-danger-outline" onclick="adminLogout()"><i class="fas fa-sign-out-alt"></i> Logout Admin</button>
+        </div>
+        <div class="admin-tabs">
+          <button class="admin-tab active" onclick="switchAdminTab('users',this)"><i class="fas fa-users"></i> Pengguna</button>
+          <button class="admin-tab" onclick="switchAdminTab('motors',this)"><i class="fas fa-motorcycle"></i> Motor</button>
+          <button class="admin-tab" onclick="switchAdminTab('checks',this)"><i class="fas fa-clipboard-check"></i> Pengecekan</button>
+          <button class="admin-tab" onclick="switchAdminTab('bengkel',this)"><i class="fas fa-wrench"></i> Bengkel</button>
+          <button class="admin-tab" onclick="switchAdminTab('biaya',this)"><i class="fas fa-money-bill"></i> Estimasi Biaya</button>
+        </div>
+        <div id="adminTab-users" class="admin-tab-content active">
+          <div class="card"><div class="card-header"><i class="fas fa-users"></i> Data Pengguna</div>
+          <div class="card-body"><div class="table-responsive"><table class="data-table"><thead><tr><th>#</th><th>Nama</th><th>Email</th><th>Motor</th><th>Pengecekan</th><th>Bergabung</th></tr></thead><tbody id="adminUsersBody"></tbody></table></div></div></div>
+        </div>
+        <div id="adminTab-motors" class="admin-tab-content">
+          <div class="card"><div class="card-header"><i class="fas fa-motorcycle"></i> Data Motor</div>
+          <div class="card-body"><div class="table-responsive"><table class="data-table"><thead><tr><th>#</th><th>Pemilik</th><th>Merek</th><th>Tipe</th><th>Tahun</th><th>Nopol</th><th>Kilometer</th></tr></thead><tbody id="adminMotorsBody"></tbody></table></div></div></div>
+        </div>
+        <div id="adminTab-checks" class="admin-tab-content">
+          <div class="card"><div class="card-header"><i class="fas fa-clipboard-check"></i> Hasil Pengecekan</div>
+          <div class="card-body"><div class="table-responsive"><table class="data-table"><thead><tr><th>#</th><th>Pengguna</th><th>Motor</th><th>Tanggal</th><th>Status</th><th>Bermasalah</th></tr></thead><tbody id="adminChecksBody"></tbody></table></div></div></div>
+        </div>
+        <div id="adminTab-bengkel" class="admin-tab-content">
+          <div class="card"><div class="card-header"><i class="fas fa-plus-circle"></i> Kelola Bengkel</div>
+          <div class="card-body">
+            <form onsubmit="addBengkel(event)">
+              <div class="form-row">
+                <div class="form-group"><label>Nama Bengkel</label><input type="text" id="adminBengkelNama" placeholder="Nama bengkel" required /></div>
+                <div class="form-group"><label>Tipe</label><select id="adminBengkelTipe"><option value="resmi">Bengkel Resmi</option><option value="umum">Bengkel Umum</option></select></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Alamat</label><input type="text" id="adminBengkelAlamat" placeholder="Alamat lengkap" required /></div>
+                <div class="form-group"><label>Jam Buka</label><input type="text" id="adminBengkelJam" placeholder="08:00 - 17:00" required /></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Nomor Telepon</label><input type="text" id="adminBengkelTelp" placeholder="Nomor WhatsApp/HP" /></div>
+                <div class="form-group"><label>Jarak</label><input type="text" id="adminBengkelJarak" placeholder="Contoh: 1.2 km" /></div>
+              </div>
+              <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Tambah Bengkel</button>
+            </form>
+            <hr style="margin:20px 0;border-color:var(--border)">
+            <div id="adminBengkelList"></div>
+          </div></div>
+        </div>
+        <div id="adminTab-biaya" class="admin-tab-content">
+          <div class="card"><div class="card-header"><i class="fas fa-money-bill-wave"></i> Kelola Estimasi Biaya</div>
+          <div class="card-body"><div id="biayaEditList"></div></div></div>
+        </div>
+      </div>
+
+    </main><!-- end contentArea -->
+  </div><!-- end appMain -->
+</div><!-- end appShell -->
+
+
+<!-- MODAL DETAIL -->
 <div id="modalDetail" class="modal-overlay hidden" onclick="closeModal()">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-header">
@@ -778,8 +590,6 @@
     </div>
   </div>
 </div>
-
-</div><!-- end mainWrapper -->
 
 <script src="script.js"></script>
 </body>

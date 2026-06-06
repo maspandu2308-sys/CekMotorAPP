@@ -63,15 +63,16 @@ const TIPS = [
   'Cuci motor minimal seminggu sekali untuk mencegah karat dan menjaga penampilan.',
 ];
 
+// SMART KOMPONEN — dengan interval KM servis otomatis
 const CHECKLIST_KOMPONEN = [
-  { id:'oli',       name:'Oli Mesin',   icon:'fas fa-oil-can',    desc:'Kondisi & volume oli' },
-  { id:'rem',       name:'Rem',          icon:'fas fa-circle-stop',desc:'Kampas & minyak rem' },
-  { id:'ban',       name:'Ban',          icon:'fas fa-circle',     desc:'Tekanan & keausan ban' },
-  { id:'lampu',     name:'Lampu',        icon:'fas fa-lightbulb',  desc:'Lampu depan & belakang' },
-  { id:'aki',       name:'Aki',          icon:'fas fa-car-battery',desc:'Daya & kondisi aki' },
-  { id:'rantai',    name:'Rantai',       icon:'fas fa-link',       desc:'Kekencangan & pelumas' },
-  { id:'mesin',     name:'Mesin',        icon:'fas fa-cogs',       desc:'Suara & performa mesin' },
-  { id:'kelistrikan',name:'Kelistrikan',icon:'fas fa-bolt',       desc:'Sistem kelistrikan' },
+  { id:'oli',        name:'Oli Mesin',     icon:'fas fa-oil-can',     intervalKm:3000,  intervalLabel:'2.000–3.000 km', pertanyaan:'Di KM berapa terakhir ganti oli mesin?',             tips:'Ganti oli setiap 2.000–3.000 km agar mesin tidak cepat aus.' },
+  { id:'rantai',     name:'Rantai',        icon:'fas fa-link',         intervalKm:800,   intervalLabel:'500–1.000 km',   pertanyaan:'Di KM berapa terakhir melumasi/servis rantai?',        tips:'Rantai kering bisa putus tiba-tiba. Lumasi setiap 500–1.000 km.' },
+  { id:'rem',        name:'Rem',           icon:'fas fa-circle-stop',  intervalKm:8000,  intervalLabel:'5.000–10.000 km',pertanyaan:'Di KM berapa terakhir cek atau ganti kampas rem?',     tips:'Kampas rem aus sangat berbahaya. Cek setiap 5.000–10.000 km.' },
+  { id:'ban',        name:'Ban',           icon:'fas fa-circle',       intervalKm:20000, intervalLabel:'15.000–25.000 km',pertanyaan:'Di KM berapa terakhir ganti ban?',                   tips:'Ban aus membahayakan terutama di jalan basah. Ganti setiap ±20.000 km.' },
+  { id:'aki',        name:'Aki',           icon:'fas fa-car-battery',  intervalKm:15000, intervalLabel:'12.000–20.000 km',pertanyaan:'Di KM berapa terakhir cek atau ganti aki?',          tips:'Aki lemah bikin motor susah starter. Cek kondisinya secara rutin.' },
+  { id:'lampu',      name:'Lampu',         icon:'fas fa-lightbulb',    intervalKm:10000, intervalLabel:'10.000 km',       pertanyaan:'Di KM berapa terakhir cek atau ganti bohlam lampu?', tips:'Pastikan semua lampu menyala normal untuk keamanan berkendara.' },
+  { id:'mesin',      name:'Tune Up Mesin', icon:'fas fa-cogs',         intervalKm:6000,  intervalLabel:'5.000–8.000 km', pertanyaan:'Di KM berapa terakhir tune up atau servis mesin?',   tips:'Tune up rutin menjaga tenaga motor dan irit bahan bakar.' },
+  { id:'kelistrikan',name:'Kelistrikan',   icon:'fas fa-bolt',         intervalKm:15000, intervalLabel:'10.000–20.000 km',pertanyaan:'Di KM berapa terakhir cek sistem kelistrikan?',      tips:'Cek kabel dan sekring secara berkala untuk mencegah korsleting.' },
 ];
 
 const ESTIMASI_BIAYA_DEFAULT = {
@@ -105,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initFirebase();
   initDefaultData();
   setTodayDate();
-  renderChecklistGrid();
 
   const saved = localStorage.getItem('cma_currentUser');
   if (saved) {
@@ -619,25 +619,146 @@ function deleteMotor(id) {
   loadMotorList();
 }
 
-// ==================== CHECKLIST ====================
-function renderChecklistGrid() {
-  const g = document.getElementById('checklistGrid'); if (!g) return;
+// ==================== SMART CHECKLIST (KM-BASED) ====================
+
+function renderSmartForm() {
+  const g = document.getElementById('smartCheckGrid'); if (!g) return;
   g.innerHTML = CHECKLIST_KOMPONEN.map(k =>
-    '<div class="checklist-item" id="item_' + k.id + '">' +
-    '<div class="checklist-item-header">' +
-    '<div class="checklist-item-icon"><i class="' + k.icon + '"></i></div>' +
-    '<div><div class="checklist-item-name">' + k.name + '</div>' +
-    '<div class="checklist-item-desc">' + k.desc + '</div></div></div>' +
-    '<div class="condition-buttons">' +
-    '<button class="cond-btn good"    onclick="setCondition(\'' + k.id + '\',\'Baik\',this)"><i class="fas fa-check"></i> Baik</button>' +
-    '<button class="cond-btn check"   onclick="setCondition(\'' + k.id + '\',\'Perlu Dicek\',this)"><i class="fas fa-exclamation"></i> Perlu Dicek</button>' +
-    '<button class="cond-btn broken"  onclick="setCondition(\'' + k.id + '\',\'Rusak\',this)"><i class="fas fa-times"></i> Rusak</button>' +
-    '</div></div>'
+    '<div class="smart-item" id="smart_' + k.id + '">' +
+      '<div class="smart-item-header">' +
+        '<div class="smart-item-icon"><i class="' + k.icon + '"></i></div>' +
+        '<div class="smart-item-info">' +
+          '<div class="smart-item-name">' + k.name + '</div>' +
+          '<div class="smart-item-interval"><i class="fas fa-route"></i> Servis tiap: ' + k.intervalLabel + '</div>' +
+        '</div>' +
+        '<div class="smart-status-indicator" id="dot_' + k.id + '"><i class="fas fa-circle-question"></i></div>' +
+      '</div>' +
+      '<div class="smart-item-body">' +
+        '<label class="smart-label"><i class="fas fa-question-circle" style="color:var(--blue-mid)"></i> ' + k.pertanyaan + '</label>' +
+        '<div class="smart-input-row">' +
+          '<div class="smart-km-wrap" id="kmWrap_' + k.id + '">' +
+            '<input type="number" id="lastKm_' + k.id + '" class="smart-km-input" placeholder="Masukkan KM..." min="0" oninput="previewStatus(\'' + k.id + '\')" />' +
+            '<span class="km-unit">km</span>' +
+          '</div>' +
+          '<button class="btn-tidak-tahu" id="btnTidakTahu_' + k.id + '" onclick="toggleTidakTahu(\'' + k.id + '\')">' +
+            '<i class="fas fa-question"></i> Tidak Tahu' +
+          '</button>' +
+        '</div>' +
+        '<div class="smart-preview" id="preview_' + k.id + '"></div>' +
+        '<div class="smart-tips"><i class="fas fa-lightbulb"></i> ' + k.tips + '</div>' +
+      '</div>' +
+    '</div>'
   ).join('');
+}
+
+function autoFillKm() {
+  const motorId = document.getElementById('checkMotorSelect').value;
+  if (!motorId) { document.getElementById('motorInfoBanner').classList.add('hidden'); return; }
+  const motor = getMotors().find(m => m.id === motorId);
+  if (!motor) return;
+  document.getElementById('checkKm').value = motor.km;
+  const banner = document.getElementById('motorInfoBanner');
+  banner.innerHTML = '<i class="fas fa-check-circle"></i> <strong>' + motor.merek + ' ' + motor.tipe + ' ' + motor.tahun + '</strong> &nbsp;|&nbsp; <i class="fas fa-id-card"></i> ' + motor.nopol + ' &nbsp;|&nbsp; <i class="fas fa-road"></i> KM tercatat: <strong>' + Number(motor.km).toLocaleString('id-ID') + ' km</strong> <span style="font-size:0.78rem;opacity:.7">(bisa diubah jika berbeda)</span>';
+  banner.classList.remove('hidden');
+  refreshAllPreviews();
+}
+
+function toggleTidakTahu(id) {
+  const btn    = document.getElementById('btnTidakTahu_' + id);
+  const wrap   = document.getElementById('kmWrap_' + id);
+  const input  = document.getElementById('lastKm_' + id);
+  const active = btn.classList.toggle('active');
+  if (active) {
+    input.value = '';
+    input.disabled = true;
+    wrap.style.opacity = '0.4';
+    currentChecklistData[id] = { status:'Perlu Dicek', kmSince:null, tidakTahu:true };
+    showPreview(id, 'Perlu Dicek', 'Data tidak tersedia — sistem tandai untuk dicek saat servis', 'var(--orange)', 'fas fa-question-circle');
+  } else {
+    input.disabled = false;
+    wrap.style.opacity = '1';
+    delete currentChecklistData[id];
+    document.getElementById('preview_' + id).innerHTML = '';
+    setDot(id, '');
+  }
+}
+
+function previewStatus(id) {
+  const k         = CHECKLIST_KOMPONEN.find(x => x.id === id);
+  const currentKm = parseInt(document.getElementById('checkKm').value || '0');
+  const lastKm    = parseInt(document.getElementById('lastKm_' + id).value || '');
+
+  if (!currentKm) {
+    document.getElementById('preview_' + id).innerHTML =
+      '<span style="color:var(--gray-400);font-size:0.8rem"><i class="fas fa-arrow-up"></i> Isi KM Saat Ini terlebih dahulu</span>';
+    return;
+  }
+  if (isNaN(lastKm) || document.getElementById('lastKm_' + id).value === '') {
+    document.getElementById('preview_' + id).innerHTML = '';
+    setDot(id, '');
+    return;
+  }
+  if (lastKm > currentKm) {
+    showPreview(id, 'error', 'KM terakhir tidak boleh lebih besar dari KM saat ini!', 'var(--red)', 'fas fa-times-circle');
+    return;
+  }
+
+  const kmSince = currentKm - lastKm;
+  const pct     = kmSince / k.intervalKm;
+  let status, color, icon, label;
+
+  if (pct <= 0.65) {
+    status = 'Baik';
+    color  = 'var(--green)';
+    icon   = 'fas fa-check-circle';
+    label  = 'Masih aman — ' + kmSince.toLocaleString('id-ID') + ' km sejak servis (interval ' + k.intervalKm.toLocaleString('id-ID') + ' km)';
+  } else if (pct <= 1.0) {
+    status = 'Perlu Dicek';
+    color  = 'var(--orange)';
+    icon   = 'fas fa-exclamation-circle';
+    label  = 'Mendekati jadwal servis — sudah ' + kmSince.toLocaleString('id-ID') + ' km (batas ' + k.intervalKm.toLocaleString('id-ID') + ' km)';
+  } else {
+    status = 'Rusak';
+    color  = 'var(--red)';
+    icon   = 'fas fa-exclamation-triangle';
+    label  = 'Sudah melewati batas! ' + kmSince.toLocaleString('id-ID') + ' km sejak servis (batas ' + k.intervalKm.toLocaleString('id-ID') + ' km)';
+  }
+
+  showPreview(id, status, label, color, icon);
+  currentChecklistData[id] = { status, kmSince, lastKm };
+}
+
+function showPreview(id, status, label, color, icon) {
+  const el = document.getElementById('preview_' + id);
+  if (el) el.innerHTML = '<span style="color:' + color + ';font-size:0.82rem;font-weight:600;display:flex;align-items:center;gap:6px"><i class="' + icon + '"></i>' + label + '</span>';
+  setDot(id, color, status);
+}
+
+function setDot(id, color, status) {
+  const dot = document.getElementById('dot_' + id);
+  if (!dot) return;
+  if (!color) {
+    dot.innerHTML = '<i class="fas fa-circle-question" style="color:var(--gray-300)"></i>';
+    dot.title = '';
+  } else {
+    const icons = { 'Baik':'fas fa-check-circle', 'Perlu Dicek':'fas fa-exclamation-circle', 'Rusak':'fas fa-exclamation-triangle', 'error':'fas fa-times-circle' };
+    dot.innerHTML = '<i class="' + (icons[status]||'fas fa-circle') + '" style="color:' + color + '"></i>';
+    dot.title = status;
+  }
+}
+
+function refreshAllPreviews() {
+  CHECKLIST_KOMPONEN.forEach(k => {
+    const btn = document.getElementById('btnTidakTahu_' + k.id);
+    if (btn && btn.classList.contains('active')) return; // skip "tidak tahu"
+    const inp = document.getElementById('lastKm_' + k.id);
+    if (inp && inp.value !== '') previewStatus(k.id);
+  });
 }
 
 function loadChecklistPage() {
   populateMotorSelects();
+  renderSmartForm();
 }
 
 function populateMotorSelects() {
@@ -648,21 +769,13 @@ function populateMotorSelects() {
   ids.forEach(id => { const s = document.getElementById(id); if(s) s.innerHTML = opts; });
 }
 
-function setCondition(id, val, btn) {
-  currentChecklistData[id] = val;
-  const p = btn.closest('.condition-buttons');
-  p.querySelectorAll('.cond-btn').forEach(b => b.classList.remove('selected'));
-  btn.classList.add('selected');
-  const item = document.getElementById('item_' + id);
-  item.style.borderColor = val === 'Baik' ? 'var(--green)' : val === 'Rusak' ? 'var(--red)' : 'var(--yellow)';
-}
-
 function resetChecklist() {
   currentChecklistData = {};
-  renderChecklistGrid();
-  const ids = ['checkMotorSelect','checkKm','checkCatatan'];
-  ids.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
-  showToast('Checklist direset.', 'info');
+  renderSmartForm();
+  ['checkMotorSelect','checkKm','checkCatatan'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  const banner = document.getElementById('motorInfoBanner');
+  if (banner) banner.classList.add('hidden');
+  showToast('Form diagnosa direset.', 'info');
 }
 
 function analyzeCondition() {
@@ -671,35 +784,65 @@ function analyzeCondition() {
   const catatan = document.getElementById('checkCatatan').value;
 
   if (!motorId) { showToast('Pilih motor terlebih dahulu!', 'error'); return; }
+  if (!km)      { showToast('Isi KM odometer saat ini!', 'error'); return; }
 
-  const unchecked = CHECKLIST_KOMPONEN.filter(k => !currentChecklistData[k.id]);
-  if (unchecked.length) { showToast('Pilih kondisi untuk: ' + unchecked.map(k => k.name).join(', ') + '!', 'error'); return; }
+  // Cek komponen yg belum diisi (bukan "tidak tahu")
+  const belumDiisi = CHECKLIST_KOMPONEN.filter(k => {
+    const btn = document.getElementById('btnTidakTahu_' + k.id);
+    const isTidakTahu = btn && btn.classList.contains('active');
+    return !isTidakTahu && !currentChecklistData[k.id];
+  });
+  if (belumDiisi.length) {
+    showToast('Belum diisi: ' + belumDiisi.map(k => k.name).join(', ') + '. Klik "Tidak Tahu" jika tidak ingat.', 'error');
+    return;
+  }
 
-  const motor      = getMotors().find(m => m.id === motorId);
-  const baik       = Object.values(currentChecklistData).filter(v => v === 'Baik').length;
-  const perluDicek = Object.values(currentChecklistData).filter(v => v === 'Perlu Dicek').length;
-  const rusak      = Object.values(currentChecklistData).filter(v => v === 'Rusak').length;
+  const motor = getMotors().find(m => m.id === motorId);
+
+  // Bangun objek checklist flat (status per komponen)
+  const checklistFlat = {};
+  CHECKLIST_KOMPONEN.forEach(k => {
+    const d = currentChecklistData[k.id];
+    checklistFlat[k.id] = d ? d.status : 'Perlu Dicek';
+  });
+
+  const baik       = Object.values(checklistFlat).filter(v => v === 'Baik').length;
+  const perluDicek = Object.values(checklistFlat).filter(v => v === 'Perlu Dicek').length;
+  const rusak      = Object.values(checklistFlat).filter(v => v === 'Rusak').length;
   const score      = Math.round((baik / CHECKLIST_KOMPONEN.length) * 100);
+
+  // Build detail per komponen (termasuk kmSince)
+  const checklistDetail = {};
+  CHECKLIST_KOMPONEN.forEach(k => {
+    const d = currentChecklistData[k.id];
+    checklistDetail[k.id] = {
+      status  : d ? d.status : 'Perlu Dicek',
+      kmSince : d ? d.kmSince : null,
+      lastKm  : d ? d.lastKm : null,
+      tidakTahu: d ? !!d.tidakTahu : false,
+    };
+  });
 
   const data = {
     motorId, motorName: motor.merek + ' ' + motor.tipe + ' ' + motor.tahun,
-    motorNopol: motor.nopol, km: km || motor.km,
-    checklist: { ...currentChecklistData }, catatan,
+    motorNopol: motor.nopol, km,
+    checklist: checklistFlat, checklistDetail, catatan,
     baik, perluDicek, rusak, score,
     tanggal:    new Date().toLocaleDateString('id-ID'),
     tanggalISO: new Date().toISOString(),
     status: rusak > 0 ? 'Perlu Servis Segera' : perluDicek > 0 ? 'Perlu Perhatian' : 'Kondisi Baik',
+    diagMode: 'smart-km',
   };
   localStorage.setItem('cma_lastAnalysis', JSON.stringify(data));
 
-  const bermasalah = CHECKLIST_KOMPONEN.filter(k => currentChecklistData[k.id] !== 'Baik').map(k => k.name);
-  const histItem   = { id:'h_'+Date.now(), motorId, motorName:data.motorName, km:data.km, tanggal:data.tanggal, tanggalISO:data.tanggalISO, status:data.status, bermasalah, score, checklist: { ...currentChecklistData }, catatan };
+  const bermasalah = CHECKLIST_KOMPONEN.filter(k => checklistFlat[k.id] !== 'Baik').map(k => k.name);
+  const histItem   = { id:'h_'+Date.now(), motorId, motorName:data.motorName, km:data.km, tanggal:data.tanggal, tanggalISO:data.tanggalISO, status:data.status, bermasalah, score, checklist:checklistFlat, checklistDetail, catatan };
   const history    = getHistory();
   history.unshift(histItem);
   saveHistory(history);
-  pushHistoryItemToFirebase(histItem); // fire-and-forget
+  pushHistoryItemToFirebase(histItem);
 
-  showToast('Analisis selesai!', 'success');
+  showToast('Diagnosa selesai!', 'success');
   showPage('hasilAnalisis');
 }
 
@@ -723,9 +866,14 @@ function loadHasilPage() {
 
   const komponenHtml = CHECKLIST_KOMPONEN.map(k => {
     const kondisi = data.checklist[k.id] || '-';
+    const detail  = data.checklistDetail?.[k.id];
     const cls = kondisi === 'Baik' ? 'komponen-baik' : kondisi === 'Perlu Dicek' ? 'komponen-check' : 'komponen-rusak';
-    return '<div class="komponen-item"><div class="komponen-icon"><i class="' + k.icon + '"></i></div>' +
-           '<div class="komponen-name">' + k.name + '</div>' +
+    const kmInfo = detail && detail.kmSince !== null
+      ? '<div style="font-size:0.72rem;color:var(--gray-400);margin-top:2px">' + detail.kmSince.toLocaleString('id-ID') + ' km sejak servis</div>'
+      : (detail && detail.tidakTahu ? '<div style="font-size:0.72rem;color:var(--gray-400);margin-top:2px">Data tidak diketahui</div>' : '');
+    return '<div class="komponen-item">' +
+           '<div class="komponen-icon"><i class="' + k.icon + '"></i></div>' +
+           '<div style="flex:1"><div class="komponen-name">' + k.name + '</div>' + kmInfo + '</div>' +
            '<div class="komponen-status ' + cls + '">' + kondisi + '</div></div>';
   }).join('');
 

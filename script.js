@@ -75,15 +75,17 @@ const CHECKLIST_KOMPONEN = [
   { id:'kelistrikan',name:'Kelistrikan',   icon:'fas fa-bolt',         intervalKm:15000, intervalLabel:'10.000–20.000 km',pertanyaan:'Di KM berapa terakhir cek sistem kelistrikan?',      tips:'Cek kabel dan sekring secara berkala untuk mencegah korsleting.' },
 ];
 
+// Harga referensi bengkel Indonesia 2024–2025
+// Sumber: AHASS, bengkel umum, marketplace suku cadang
 const ESTIMASI_BIAYA_DEFAULT = {
-  oli:       { nama:'Ganti Oli Mesin',          min:60000,  max:100000 },
-  rem:       { nama:'Servis / Ganti Kampas Rem', min:30000,  max:80000  },
-  ban:       { nama:'Ganti Ban',                 min:200000, max:350000 },
-  lampu:     { nama:'Ganti Lampu',               min:25000,  max:75000  },
-  aki:       { nama:'Ganti / Servis Aki',        min:50000,  max:150000 },
-  rantai:    { nama:'Servis / Ganti Rantai',     min:40000,  max:120000 },
-  mesin:     { nama:'Tune Up Mesin',             min:80000,  max:200000 },
-  kelistrikan:{ nama:'Servis Kelistrikan',        min:50000,  max:150000 },
+  oli:        { nama:'Ganti Oli Mesin',          min:55000,  max:130000,  catatan:'Termasuk oli (0,8–1L) + jasa ganti. Oli AHM/Yamalube Rp35–80rb, oli premium lebih mahal.' },
+  rantai:     { nama:'Servis & Lumasi Rantai',   min:15000,  max:45000,   catatan:'Jasa lumas + setel rantai. Ganti rantai+sproket set Rp200–450rb jika sudah aus.' },
+  rem:        { nama:'Ganti Kampas Rem',          min:40000,  max:130000,  catatan:'Kampas rem ori Rp25–80rb/set + jasa. Depan & belakang bisa berbeda harga.' },
+  ban:        { nama:'Ganti Ban Motor',           min:180000, max:520000,  catatan:'Ban luar matic 14" Rp150–350rb, 17" Rp200–450rb. Tambah ban dalam Rp30–60rb + jasa.' },
+  aki:        { nama:'Ganti Aki',                 min:140000, max:400000,  catatan:'Aki kering 3Ah Rp150–250rb, 5Ah Rp200–380rb. Aki basah lebih murah Rp130–200rb.' },
+  lampu:      { nama:'Ganti Lampu',               min:20000,  max:230000,  catatan:'Bohlam biasa Rp10–25rb. Lampu LED Rp50–200rb. Jasa pasang Rp10–20rb.' },
+  mesin:      { nama:'Tune Up Mesin',             min:80000,  max:260000,  catatan:'Termasuk busi (Rp15–40rb), filter udara (Rp20–50rb), stel karbu/injeksi + jasa.' },
+  kelistrikan:{ nama:'Servis Kelistrikan',        min:50000,  max:175000,  catatan:'Cek + servis sistem pengapian, sekring, kabel. Ganti komponen tertentu bisa lebih mahal.' },
 };
 
 const BENGKEL_DEFAULT = [
@@ -520,7 +522,7 @@ function loadDashboard() {
     const lastCheck = history.filter(h => h.motorId === m.id).slice(-1)[0];
     const cls  = lastCheck ? (lastCheck.status === 'Kondisi Baik' ? 'status-good' : 'status-danger') : 'status-warning';
     const txt  = lastCheck ? lastCheck.status : 'Belum dicek';
-    const icon = lastCheck ? (lastCheck.status === 'Kondisi Baik' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle') : 'fas fa-question-circle';
+    const icon = lastCheck ? (lastCheck.status === 'Kondisi Baik' ? 'fas fa-check-circle' : lastCheck.status === 'Perlu Perhatian' ? 'fas fa-exclamation-circle' : 'fas fa-exclamation-triangle') : 'fas fa-question-circle';
     statusEl.innerHTML = '<div class="status-card-inner"><div class="status-motor-info">' +
       '<div class="status-motor-name">' + m.merek + ' ' + m.tipe + ' ' + m.tahun + '</div>' +
       '<div class="status-motor-detail"><i class="fas fa-id-card"></i> ' + m.nopol +
@@ -874,14 +876,15 @@ function loadHasilPage() {
   const komponenHtml = CHECKLIST_KOMPONEN.map(k => {
     const kondisi = data.checklist[k.id] || '-';
     const detail  = data.checklistDetail?.[k.id];
-    const cls = kondisi === 'Baik' ? 'komponen-baik' : kondisi === 'Perlu Dicek' ? 'komponen-check' : 'komponen-rusak';
-    const kmInfo = detail && detail.kmSince !== null
-      ? '<div style="font-size:0.72rem;color:var(--gray-400);margin-top:2px">' + detail.kmSince.toLocaleString('id-ID') + ' km sejak servis</div>'
+    const cls     = statusClass(kondisi);
+    const label   = statusDisplay(kondisi);
+    const kmInfo  = detail && detail.kmSince !== null
+      ? '<div style="font-size:0.72rem;color:var(--gray-400);margin-top:2px">' + detail.kmSince.toLocaleString('id-ID') + ' km sejak servis terakhir</div>'
       : (detail && detail.tidakTahu ? '<div style="font-size:0.72rem;color:var(--gray-400);margin-top:2px">Data tidak diketahui</div>' : '');
     return '<div class="komponen-item">' +
            '<div class="komponen-icon"><i class="' + k.icon + '"></i></div>' +
            '<div style="flex:1"><div class="komponen-name">' + k.name + '</div>' + kmInfo + '</div>' +
-           '<div class="komponen-status ' + cls + '">' + kondisi + '</div></div>';
+           '<div class="komponen-status ' + cls + '">' + label + '</div></div>';
   }).join('');
 
   const bermasalah = CHECKLIST_KOMPONEN.filter(k => data.checklist[k.id] !== 'Baik');
@@ -889,11 +892,15 @@ function loadHasilPage() {
   const biayaHtml = bermasalah.length
     ? bermasalah.map(k => {
         const b  = biaya[k.id]; if (!b) return '';
-        const pr = data.checklist[k.id] === 'Rusak' ? 'priority-high' : 'priority-medium';
-        const pt = data.checklist[k.id] === 'Rusak' ? 'Prioritas Tinggi' : 'Sedang';
+        const st = data.checklist[k.id];
+        const pr = st === 'Rusak' ? 'priority-high' : 'priority-medium';
+        const pt = st === 'Rusak' ? '⚠️ Wajib Servis' : '⏰ Perlu Servis';
         totalMin += b.min; totalMax += b.max;
-        return '<div class="biaya-item"><div><i class="' + k.icon + '" style="color:var(--blue);margin-right:8px"></i><span class="biaya-name">' + b.nama + '</span></div>' +
-               '<div style="display:flex;align-items:center;gap:12px"><span class="biaya-range">Rp ' + b.min.toLocaleString('id-ID') + ' – Rp ' + b.max.toLocaleString('id-ID') + '</span>' +
+        return '<div class="biaya-item">' +
+               '<div style="flex:1"><div style="display:flex;align-items:center;gap:8px"><i class="' + k.icon + '" style="color:var(--blue)"></i><span class="biaya-name">' + b.nama + '</span></div>' +
+               (b.catatan ? '<div style="font-size:0.74rem;color:var(--gray-400);margin-top:3px">' + b.catatan + '</div>' : '') +
+               '</div>' +
+               '<div style="display:flex;align-items:center;gap:10px;flex-shrink:0"><span class="biaya-range">Rp ' + b.min.toLocaleString('id-ID') + ' – Rp ' + b.max.toLocaleString('id-ID') + '</span>' +
                '<span class="biaya-priority ' + pr + '">' + pt + '</span></div></div>';
       }).join('')
     : '<p style="color:var(--gray-500);font-size:0.88rem;padding:12px 0">Tidak ada komponen yang memerlukan biaya servis.</p>';
@@ -927,9 +934,9 @@ function loadHasilPage() {
 
     '<div class="card"><div class="card-header"><i class="fas fa-list-check"></i> Ringkasan Komponen</div><div class="card-body">' +
     '<div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap">' +
-    '<div style="background:var(--green-light);padding:10px 20px;border-radius:var(--radius-sm);text-align:center"><div style="font-size:1.5rem;font-weight:800;color:var(--green)">' + data.baik + '</div><div style="font-size:0.78rem;color:var(--green)">Baik</div></div>' +
-    '<div style="background:var(--orange-light);padding:10px 20px;border-radius:var(--radius-sm);text-align:center"><div style="font-size:1.5rem;font-weight:800;color:var(--orange)">' + data.perluDicek + '</div><div style="font-size:0.78rem;color:var(--orange)">Perlu Dicek</div></div>' +
-    '<div style="background:var(--red-light);padding:10px 20px;border-radius:var(--radius-sm);text-align:center"><div style="font-size:1.5rem;font-weight:800;color:var(--red)">' + data.rusak + '</div><div style="font-size:0.78rem;color:var(--red)">Rusak</div></div></div>' +
+    '<div style="background:var(--green-light);padding:10px 20px;border-radius:var(--radius-sm);text-align:center"><div style="font-size:1.5rem;font-weight:800;color:var(--green)">' + data.baik + '</div><div style="font-size:0.78rem;color:var(--green)">Aman</div></div>' +
+    '<div style="background:var(--orange-light);padding:10px 20px;border-radius:var(--radius-sm);text-align:center"><div style="font-size:1.5rem;font-weight:800;color:var(--orange)">' + data.perluDicek + '</div><div style="font-size:0.78rem;color:var(--orange)">Perlu Servis</div></div>' +
+    '<div style="background:var(--red-light);padding:10px 20px;border-radius:var(--radius-sm);text-align:center"><div style="font-size:1.5rem;font-weight:800;color:var(--red)">' + data.rusak + '</div><div style="font-size:0.78rem;color:var(--red)">Wajib Servis</div></div></div>' +
     '<div class="komponen-grid">' + komponenHtml + '</div>' +
     (data.catatan ? '<div style="margin-top:12px;background:var(--gray-50);border-radius:var(--radius-sm);padding:12px 16px;border:1px solid var(--border)"><strong style="font-size:0.85rem"><i class="fas fa-sticky-note" style="color:var(--blue)"></i> Catatan:</strong><p style="font-size:0.85rem;color:var(--gray-600);margin-top:4px">' + data.catatan + '</p></div>' : '') +
     '</div></div>' +
@@ -1085,7 +1092,7 @@ function loadHistory() {
   if (table) table.style.display = '';
 
   tbody.innerHTML = history.map((h, i) => {
-    const bc  = h.status === 'Kondisi Baik' ? 'badge-green' : h.status === 'Perlu Perhatian' ? 'badge-orange' : 'badge-red';
+    const bc  = badgeClass(h.status);
     const bmt = h.bermasalah?.length ? h.bermasalah.slice(0,3).join(', ') + (h.bermasalah.length>3?'...':'') : 'Tidak ada';
     return '<tr><td>' + (i+1) + '</td><td>' + h.tanggal + '</td><td><strong>' + h.motorName + '</strong></td>' +
       '<td>' + Number(h.km).toLocaleString('id-ID') + ' km</td>' +
@@ -1098,11 +1105,10 @@ function loadHistory() {
 
 function showHistoryDetail(id) {
   const h = getHistory().find(x => x.id === id); if (!h) return;
-  const bc    = h.status === 'Kondisi Baik' ? 'badge-green' : h.status === 'Perlu Perhatian' ? 'badge-orange' : 'badge-red';
+  const bc    = badgeClass(h.status);
   const rows  = CHECKLIST_KOMPONEN.map(k => {
     const kondisi = h.checklist?.[k.id] || '-';
-    const cls = kondisi === 'Baik' ? 'komponen-baik' : kondisi === 'Perlu Dicek' ? 'komponen-check' : 'komponen-rusak';
-    return '<tr><td><i class="' + k.icon + '"></i> ' + k.name + '</td><td><span class="komponen-status ' + cls + '" style="font-size:0.8rem">' + kondisi + '</span></td></tr>';
+    return '<tr><td><i class="' + k.icon + '"></i> ' + k.name + '</td><td><span class="komponen-status ' + statusClass(kondisi) + '" style="font-size:0.8rem">' + statusDisplay(kondisi) + '</span></td></tr>';
   }).join('');
 
   document.getElementById('modalDetailBody').innerHTML =
@@ -1241,4 +1247,23 @@ function nextTip() {
 function setEl(id, val) {
   const el = document.getElementById(id);
   if (el) el.textContent = val;
+}
+
+// Konversi status internal → label tampilan user
+function statusDisplay(s) {
+  if (s === 'Baik')        return 'Aman';
+  if (s === 'Perlu Dicek') return 'Perlu Servis';
+  if (s === 'Rusak')       return 'Wajib Servis';
+  return s || '-';
+}
+function statusClass(s) {
+  if (s === 'Baik')        return 'komponen-baik';
+  if (s === 'Perlu Dicek') return 'komponen-check';
+  if (s === 'Rusak')       return 'komponen-rusak';
+  return '';
+}
+function badgeClass(s) {
+  if (s === 'Kondisi Baik')       return 'badge-green';
+  if (s === 'Perlu Perhatian')    return 'badge-orange';
+  return 'badge-red';
 }

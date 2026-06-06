@@ -703,25 +703,32 @@ function previewStatus(id) {
     return;
   }
 
-  const kmSince = currentKm - lastKm;
-  const pct     = kmSince / k.intervalKm;
+  const kmSince    = currentKm - lastKm;
+  const sisa       = k.intervalKm - kmSince;           // km tersisa sebelum jadwal
+  const pct        = kmSince / k.intervalKm;           // persentase pemakaian
   let status, color, icon, label;
 
-  if (pct <= 0.65) {
+  if (pct < 0.70) {
+    // Masih jauh dari jadwal servis
     status = 'Baik';
     color  = 'var(--green)';
     icon   = 'fas fa-check-circle';
-    label  = 'Masih aman — ' + kmSince.toLocaleString('id-ID') + ' km sejak servis (interval ' + k.intervalKm.toLocaleString('id-ID') + ' km)';
-  } else if (pct <= 1.0) {
+    label  = 'Aman — sudah ' + kmSince.toLocaleString('id-ID') + ' km, masih sisa ±' + sisa.toLocaleString('id-ID') + ' km sebelum jadwal servis';
+  } else if (pct < 1.0) {
+    // Mendekati jadwal servis
     status = 'Perlu Dicek';
     color  = 'var(--orange)';
     icon   = 'fas fa-exclamation-circle';
-    label  = 'Mendekati jadwal servis — sudah ' + kmSince.toLocaleString('id-ID') + ' km (batas ' + k.intervalKm.toLocaleString('id-ID') + ' km)';
+    label  = 'Mendekati jadwal — sudah ' + kmSince.toLocaleString('id-ID') + ' km, sisa ±' + sisa.toLocaleString('id-ID') + ' km lagi harus servis';
   } else {
+    // Sudah melewati / tepat di batas interval → WAJIB SERVIS
+    const lewat = kmSince - k.intervalKm;
     status = 'Rusak';
     color  = 'var(--red)';
     icon   = 'fas fa-exclamation-triangle';
-    label  = 'Sudah melewati batas! ' + kmSince.toLocaleString('id-ID') + ' km sejak servis (batas ' + k.intervalKm.toLocaleString('id-ID') + ' km)';
+    label  = lewat === 0
+      ? 'Tepat waktunya diservis! (' + kmSince.toLocaleString('id-ID') + ' km = interval ' + k.intervalKm.toLocaleString('id-ID') + ' km)'
+      : 'Terlambat servis! Sudah lewat ' + lewat.toLocaleString('id-ID') + ' km dari jadwal — segera ke bengkel!';
   }
 
   showPreview(id, status, label, color, icon);

@@ -289,6 +289,9 @@ input[type=number], input[type=date], select, textarea {
   font-family: inherit; background: white; transition: var(--tr); outline: none;
 }
 input:focus, select:focus, textarea:focus { border-color: var(--blue-mid); box-shadow: 0 0 0 3px rgba(25,118,210,.1); }
+input[type=number] { -moz-appearance: textfield; }
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 input::placeholder, textarea::placeholder { color: var(--gray-400); }
 textarea { resize: vertical; min-height: 80px; }
 
@@ -354,9 +357,11 @@ textarea { resize: vertical; min-height: 80px; }
 
 .smart-input-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
 .smart-km-wrap { position: relative; flex: 1; transition: opacity .2s; }
-.smart-km-input { width: 100%; padding: 9px 44px 9px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: .88rem; font-family: inherit; outline: none; transition: var(--tr); }
+.smart-km-input { width: 100%; padding: 9px 44px 9px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm); font-size: .88rem; font-family: inherit; outline: none; transition: var(--tr); -moz-appearance: textfield; }
 .smart-km-input:focus { border-color: var(--blue); }
 .smart-km-input:disabled { background: var(--gray-100); cursor: not-allowed; }
+.smart-km-input::-webkit-outer-spin-button,
+.smart-km-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .km-unit { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: .78rem; font-weight: 600; color: var(--gray-400); pointer-events: none; }
 
 .btn-tidak-tahu { padding: 8px 12px; border: 1.5px dashed var(--gray-400); border-radius: var(--radius-sm); background: white; color: var(--gray-500); font-size: .78rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: var(--tr); font-family: inherit; display: flex; align-items: center; gap: 5px; }
